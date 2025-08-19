@@ -1024,7 +1024,7 @@ export default definePlugin({
                 },
                 {
                     // Open Video Modal
-                    match: /(\i\?)(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
+                    match: /(\i\?)?(\(0,\i.openVideoQuestModal\)\({quest:(\i))/,
                     replace: "$1questifyContinue&&$2"
                 },
                 {
