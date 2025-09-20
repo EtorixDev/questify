@@ -863,29 +863,29 @@ export default definePlugin({
     useQuestRerender,
 
     patches: [
-        // {
-        //     find: "could not play audio",
-        //     group: true,
-        //     replacement: [
-        //         {
-        //             // Enables external audio sources for playing audio.
-        //             match: /(?<=new Audio;\i\.src=)/,
-        //             replace: "this.name.startsWith('https')?this.name:"
-        //         },
-        //         {
-        //             // Adds an optional callback to the audio player. This is needed to detect
-        //             // when the audio has finished playing as playWithListener() relies on a duration
-        //             // variable which is never present.
-        //             match: /(constructor\(\i,\i,\i,\i)(\){)/,
-        //             replace: "$1,callback$2this.callback=callback||null,"
-        //         },
-        //         {
-        //             // Makes use of the callback if provided.
-        //             match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
-        //             replace: "{this.callback?this.callback():null;$1;}"
-        //         }
-        //     ]
-        // },
+        {
+            find: "could not play audio",
+            group: true,
+            replacement: [
+                {
+                    // Enables external audio sources for playing audio.
+                    match: /(?<=new Audio;\i\.src=)/,
+                    replace: "this.name.startsWith('https')?this.name:"
+                },
+                {
+                    // Adds an optional callback to the audio player. This is needed to detect
+                    // when the audio has finished playing as playWithListener() relies on a duration
+                    // variable which is never present.
+                    match: /(constructor\(\i,\i,\i,\i)(\){)/,
+                    replace: "$1,callback$2this.callback=callback||null,"
+                },
+                {
+                    // Makes use of the callback if provided.
+                    match: /(?<=.onended=\(\)=>)(this.destroyAudio\(\))/,
+                    replace: "{this.callback?this.callback():null;$1;}"
+                }
+            ]
+        },
         {
             // Hides the notice in the gift inventory that Quests have been relocated to the Discovery tab.
             find: "quests-wumpus-hikes-mountain-transparent-background",
