@@ -14,13 +14,10 @@ import { Quest, QuestStatus, RGB } from "./components";
 
 export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
-// Only takes an audio name or URL. Plays instantly.
-export const PlayAudio = findByCodeLazy("Unable to find sound for pack name:");
-// Takes an audio name or URL, volume, and a callback function. Plays when play() is called.
 const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
 export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback ?? (() => { })); }
 export const QuestsStore = findStoreLazy("QuestsStore");
-export const questPath = "/discovery/quests";
+export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;
 export const rightClick = 2;
