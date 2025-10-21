@@ -556,11 +556,13 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
         const success = await reportVideoQuestProgress(quest, questDuration, QuestifyLogger);
         if (success) {
             QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
-            showNotification({
-                title: "Quest Completed!",
-                body: `You've completed the quest: "${questName}"`,
-                dismissOnClick: true,
-            });
+            if (settings.store.notifyOnQuestComplete) {
+                showNotification({
+                    title: "Quest Completed!",
+                    body: `You've completed the quest: "${questName}"`,
+                    dismissOnClick: true,
+                });
+            }
         } else {
             QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
         }
@@ -645,11 +647,13 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
             if (success) {
                 QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
-                showNotification({
-                    title: "Quest Completed!",
-                    body: `You've completed the quest: "${questName}"`,
-                    dismissOnClick: true,
-                });
+                if (settings.store.notifyOnQuestComplete) {
+                    showNotification({
+                        title: "Quest Completed!",
+                        body: `You've completed the quest: "${questName}"`,
+                        dismissOnClick: true,
+                    });
+                }
             } else {
                 QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
             }
@@ -663,11 +667,13 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
                 if (success) {
                     QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
-                    showNotification({
-                        title: "Quest Completed!",
-                        body: `You've completed the quest: "${questName}"`,
-                        dismissOnClick: true,
-                    });
+                    if (settings.store.notifyOnQuestComplete) {
+                        showNotification({
+                            title: "Quest Completed!",
+                            body: `You've completed the quest: "${questName}"`,
+                            dismissOnClick: true,
+                        });
+                    }
                 } else {
                     QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
                 }
