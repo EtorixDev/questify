@@ -7,6 +7,7 @@
 import "./styles.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import { showNotification } from "@api/Notifications";
 import { ErrorBoundary, openPluginModal } from "@components/index";
 import { getIntlMessage } from "@utils/index";
 import definePlugin, { StartAt } from "@utils/types";
@@ -548,15 +549,20 @@ async function startVideoProgressTracking(quest: Quest, questDuration: number): 
     let currentProgress = initialProgress;
     const timeRemaining = Math.max(0, questDuration - currentProgress);
     const reportEverySec = 10;
-
     async function handleSendComplete() {
         clearInterval(progressIntervalId);
         clearTimeout(renderIntervalId);
         activeQuestIntervals.delete(quest.id);
         const success = await reportVideoQuestProgress(quest, questDuration, QuestifyLogger);
-
         if (success) {
             QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+            if (settings.store.notifyOnQuestComplete) {
+                showNotification({
+                    title: "Quest Completed!",
+                    body: `You've completed the quest: "${questName}"`,
+                    dismissOnClick: true,
+                });
+            }
         } else {
             QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
         }
@@ -641,6 +647,13 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
             if (success) {
                 QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+                if (settings.store.notifyOnQuestComplete) {
+                    showNotification({
+                        title: "Quest Completed!",
+                        body: `You've completed the quest: "${questName}"`,
+                        dismissOnClick: true,
+                    });
+                }
             } else {
                 QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
             }
@@ -654,6 +667,13 @@ async function startPlayGameProgressTracking(quest: Quest, questDuration: number
 
                 if (success) {
                     QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+                    if (settings.store.notifyOnQuestComplete) {
+                        showNotification({
+                            title: "Quest Completed!",
+                            body: `You've completed the quest: "${questName}"`,
+                            dismissOnClick: true,
+                        });
+                    }
                 } else {
                     QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}.`);
                 }

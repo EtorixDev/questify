@@ -676,7 +676,8 @@ function DisableQuestsSetting(): JSX.Element {
         disableFriendsListActiveNowPromotion,
         makeMobileQuestsDesktopCompatible,
         completeVideoQuestsInBackground,
-        completeGameQuestsInBackground
+        completeGameQuestsInBackground,
+        notifyOnQuestComplete
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -687,7 +688,8 @@ function DisableQuestsSetting(): JSX.Element {
         "disableFriendsListActiveNowPromotion",
         "makeMobileQuestsDesktopCompatible",
         "completeVideoQuestsInBackground",
-        "completeGameQuestsInBackground"
+        "completeGameQuestsInBackground",
+        "notifyOnQuestComplete"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
@@ -700,6 +702,7 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, type: "disable" },
         { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground, type: "modification" },
         { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground, type: "modification" },
+        { label: "Notify on Auto-Complete", value: "notify-on-complete", selected: notifyOnQuestComplete, type: "modification" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" }
     ];
 
@@ -729,6 +732,7 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
         settings.store.completeGameQuestsInBackground = enabledValues.includes("game-quests-background");
         settings.store.completeVideoQuestsInBackground = enabledValues.includes("video-quests-background");
+        settings.store.notifyOnQuestComplete = enabledValues.includes("notify-on-complete");
         settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
@@ -1665,6 +1669,12 @@ export const settings = definePluginSettings({
                 rerenderQuests();
             }
         },
+    },
+    notifyOnQuestComplete: {
+        type: OptionType.BOOLEAN,
+        description: "Show a notification when a quest is auto-completed.",
+        default: true,
+        hidden: true
     },
     questButton: {
         type: OptionType.COMPONENT,
