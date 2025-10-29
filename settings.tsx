@@ -5,7 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { ErrorBoundary } from "@components/index";
+import { Divider, ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { OptionType } from "@utils/types";
 import { findLazy } from "@webpack";
@@ -522,9 +522,9 @@ function QuestButtonSettings(): JSX.Element {
 
     return (
         <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
+            <Divider className={q("setting-divider")} />
             <div className={q("setting", "quest-icon-setting")}>
-                <Forms.FormSection>
+                <div>
                     <div className={q("main-inline-group")}>
                         <div>
                             <Forms.FormTitle className={q("form-title")}>
@@ -634,7 +634,7 @@ function QuestButtonSettings(): JSX.Element {
                         </div>
                     </div>
                     <div className={q("main-inline-group")}>
-                        <Forms.FormSection>
+                        <div>
                             <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Included Reward Types
                             </Forms.FormTitle>
@@ -655,9 +655,9 @@ function QuestButtonSettings(): JSX.Element {
                                 closeOnSelect={false}
                             >
                             </DynamicDropdown>
-                        </Forms.FormSection>
+                        </div>
                     </div>
-                </Forms.FormSection>
+                </div>
             </div>
         </ErrorBoundary>
     );
@@ -676,7 +676,8 @@ function DisableQuestsSetting(): JSX.Element {
         disableFriendsListActiveNowPromotion,
         makeMobileQuestsDesktopCompatible,
         completeVideoQuestsInBackground,
-        completeGameQuestsInBackground
+        completeGameQuestsInBackground,
+        notifyOnQuestComplete
     } = settings.use([
         "disableQuestsEverything",
         "disableQuestsDiscoveryTab",
@@ -687,7 +688,8 @@ function DisableQuestsSetting(): JSX.Element {
         "disableFriendsListActiveNowPromotion",
         "makeMobileQuestsDesktopCompatible",
         "completeVideoQuestsInBackground",
-        "completeGameQuestsInBackground"
+        "completeGameQuestsInBackground",
+        "notifyOnQuestComplete"
     ]);
 
     const options: DynamicDropdownSettingOption[] = [
@@ -698,9 +700,10 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, type: "disable" },
         { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, type: "disable" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, type: "disable" },
+        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" },
         { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground, type: "modification" },
         { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground, type: "modification" },
-        { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" }
+        { label: "Notify on Auto-Complete", value: "notify-on-complete", selected: notifyOnQuestComplete, type: "modification" },
     ];
 
     const disableOptions = options.filter(option => option.type === "disable");
@@ -727,9 +730,10 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
         settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
+        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
         settings.store.completeGameQuestsInBackground = enabledValues.includes("game-quests-background");
         settings.store.completeVideoQuestsInBackground = enabledValues.includes("video-quests-background");
-        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
+        settings.store.notifyOnQuestComplete = enabledValues.includes("notify-on-complete");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
         setCurrentValue(enabled);
@@ -771,9 +775,9 @@ function DisableQuestsSetting(): JSX.Element {
 
     return (
         <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
+            <Divider className={q("setting-divider")} />
             <div className={q("setting", "disable-quests-setting")}>
-                <Forms.FormSection>
+                <div>
                     <Forms.FormTitle className={q("form-title")}>
                         Quest Features
                     </Forms.FormTitle>
@@ -809,7 +813,7 @@ function DisableQuestsSetting(): JSX.Element {
                         closeOnSelect={false}
                     >
                     </DynamicDropdown>
-                </Forms.FormSection>
+                </div>
             </div>
         </ErrorBoundary>
     );
@@ -949,9 +953,9 @@ function RestyleQuestsSetting() {
 
     return (
         <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
+            <Divider className={q("setting-divider")} />
             <div className={q("setting", "restyle-quests-setting")}>
-                <Forms.FormSection>
+                <div>
                     <div>
                         <Forms.FormTitle className={q("form-title")}>
                             Restyle Quests
@@ -1028,7 +1032,7 @@ function RestyleQuestsSetting() {
                             <DummyQuestPreview quest={dummyQuest} dummyColor={dummyColor} dummyGradient={dummyGradient} />
                         )}
                     </div>
-                </Forms.FormSection>
+                </div>
             </div>
         </ErrorBoundary>
     );
@@ -1085,9 +1089,9 @@ function ReorderQuestsSetting(): JSX.Element {
 
     return (
         <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
+            <Divider className={q("setting-divider")} />
             <div className={q("setting", "reorder-quests-setting")}>
-                <Forms.FormSection>
+                <div>
                     <div>
                         <Forms.FormTitle className={q("form-title")}>
                             Reorder Quests
@@ -1247,7 +1251,7 @@ function ReorderQuestsSetting(): JSX.Element {
                             If remembering is disabled, the sort or filter options will be reset each time you open the Quest page.
                         </Forms.FormText>
                     </div>
-                </Forms.FormSection>
+                </div>
             </div>
         </ErrorBoundary>
     );
@@ -1468,9 +1472,9 @@ function FetchingQuestsSetting(): JSX.Element {
 
     return (
         <ErrorBoundary>
-            <Forms.FormDivider className={q("setting-divider")} />
+            <Divider className={q("setting-divider")} />
             <div className={q("setting", "fetching-quests-setting")}>
-                <Forms.FormSection>
+                <div>
                     <div>
                         <Forms.FormTitle className={q("form-title")}>
                             Fetching Quests
@@ -1568,7 +1572,7 @@ function FetchingQuestsSetting(): JSX.Element {
                             </div>
                         </div>
                     </div>
-                </Forms.FormSection>
+                </div>
             </div>
         </ErrorBoundary>
     );
@@ -1665,6 +1669,12 @@ export const settings = definePluginSettings({
                 rerenderQuests();
             }
         },
+    },
+    notifyOnQuestComplete: {
+        type: OptionType.BOOLEAN,
+        description: "Show a notification when a Quest is auto-completed.",
+        default: true,
+        hidden: true
     },
     questButton: {
         type: OptionType.COMPONENT,
