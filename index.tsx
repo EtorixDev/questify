@@ -901,6 +901,7 @@ export default definePlugin({
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
+    shouldHideMembersListActivelyPlayingIcon,
     processQuestForAutoComplete,
     getQuestAcceptedButtonProps,
     getQuestAcceptedButtonText,
