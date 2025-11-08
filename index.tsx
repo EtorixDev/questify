@@ -151,7 +151,7 @@ function shouldHideGiftInventoryRelocationNotice(): boolean {
     return disableQuestsGiftInventoryRelocationNotice || disableQuestsEverything;
 }
 
-function shouldHideQuestsTab(): boolean {
+function shouldHideDiscoveryTab(): boolean {
     const {
         disableQuestsDiscoveryTab,
         disableQuestsEverything
@@ -161,6 +161,18 @@ function shouldHideQuestsTab(): boolean {
     ]);
 
     return disableQuestsDiscoveryTab || disableQuestsEverything;
+}
+
+function shouldHideDirectMessagesTab(): boolean {
+    const {
+        disableQuestsDirectMessagesTab,
+        disableQuestsEverything
+    } = settings.use([
+        "disableQuestsDirectMessagesTab",
+        "disableQuestsEverything"
+    ]);
+
+    return disableQuestsDirectMessagesTab || disableQuestsEverything;
 }
 
 function shouldHideBadgeOnUserProfiles(): boolean {
@@ -895,8 +907,9 @@ export default definePlugin({
     getQuestTileClasses,
     makeDesktopCompatible,
     shouldHideQuestPopup,
-    shouldHideQuestsTab,
+    shouldHideDiscoveryTab,
     shouldPreloadQuestAssets,
+    shouldHideDirectMessagesTab,
     shouldPreventFetchingQuests,
     shouldHideBadgeOnUserProfiles,
     shouldHideGiftInventoryRelocationNotice,
@@ -952,7 +965,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(GLOBAL_DISCOVERY_TABS).map/,
-                    replace: '$1.filter(tab=>!(tab==="quests"&&$self.shouldHideQuestsTab())).map'
+                    replace: '$1.filter(tab=>!(tab==="quests"&&$self.shouldHideDiscoveryTab())).map'
                 }
             ]
         },
@@ -962,7 +975,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /(?<="family-center"\):null,\i)/,
-                    replace: "||$self.shouldHideQuestsTab()"
+                    replace: "||$self.shouldHideDirectMessagesTab()"
                 }
             ]
         },
