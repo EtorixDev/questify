@@ -7,9 +7,9 @@
 import { definePluginSettings } from "@api/Settings";
 import { Divider, ErrorBoundary } from "@components/index";
 import { Logger } from "@utils/Logger";
-import { OptionType } from "@utils/types";
+import { makeRange, OptionType } from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, Slider, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
@@ -1577,6 +1577,16 @@ function FetchingQuestsSetting(): JSX.Element {
                                 {SoundIcon(24, 24)}
                             </div>
                         </div>
+                        <div className={q("sub-inline-group")}>
+                            <div className={q("inline-group-item", "volume-slider-container")}>
+                                <Slider
+                                    markers={makeRange(0, 100, 10)}
+                                    initialValue={settings.store.fetchingQuestsAlertVolume}
+                                    onValueChange={val => { settings.store.fetchingQuestsAlertVolume = val; }}
+                                    className={q("volume-slider")}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1635,7 +1645,7 @@ export const settings = definePluginSettings({
     disableMembersListActivelyPlayingIcon: {
         type: OptionType.BOOLEAN,
         description: "Disable the actively playing icon in members list items.",
-        default: false,
+        default: true,
         hidden: true
     },
     makeMobileQuestsDesktopCompatible: {
@@ -1774,6 +1784,12 @@ export const settings = definePluginSettings({
         type: OptionType.STRING | OptionType.CUSTOM,
         description: "The sound to play when new Quests are detected.",
         default: defaultFetchQuestsAlert, // Item from predefined list or a URL to CSP valid audio file.
+        hidden: true
+    },
+    fetchingQuestsAlertVolume: {
+        type: OptionType.NUMBER,
+        description: "The volume for the new Quest alert sound.",
+        default: 100, // 0 - 100
         hidden: true
     },
     restyleQuests: {
