@@ -74,7 +74,7 @@ export function fetchAndAlertQuests(source: string, logger: Logger): void {
 
                 if (shouldAlert && newOnlyFiltered.length > 0) {
                     logger.info(`[${getFormattedNow()}] New Quests detected. Playing alert sound.`);
-                    AudioPlayer(shouldAlert, 1).play();
+                    AudioPlayer(shouldAlert, settings.store.fetchingQuestsAlertVolume / 100).play();
                 } else {
                     logger.info(`[${getFormattedNow()}] New Quests detected.`);
                 }
@@ -1572,7 +1572,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                         if (activePlayer.current) {
                                             clearActivePlayer();
                                         } else {
-                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, 1, clearActivePlayer);
+                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, settings.store.fetchingQuestsAlertVolume / 100, clearActivePlayer);
                                             activePlayer.current?.play();
                                             setIsPlaying(true);
                                         }
