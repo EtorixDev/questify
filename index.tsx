@@ -985,6 +985,7 @@ export default definePlugin({
             // Same as above, probably? Not sure when
             // each function is used, so patching both.
             find: "iconOnly)},",
+            group: true,
             replacement: [
                 {
                     match: /(?=if\(\i\))/,
@@ -1056,8 +1057,8 @@ export default definePlugin({
                 },
                 {
                     // QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN
-                    match: /(var \i,\i,\i,\i,\i,\i,\i;\i.\i.dispatch\({)/,
-                    replace: "if($self.shouldPreventFetchingQuests())return;$1"
+                    match: /(?=var.{0,150}QUESTS_FETCH_QUEST_TO_DELIVER_BEGIN)/,
+                    replace: "if($self.shouldPreventFetchingQuests())return;"
                 }
             ]
         },
