@@ -974,8 +974,8 @@ export default definePlugin({
             find: "QUEST_HOME_V2):",
             replacement: [
                 {
-                    match: /(?<="family-center"\):null,\i)/,
-                    replace: "||$self.shouldHideDirectMessagesTab()"
+                    match: /(?<="family-center"\):null,)(\i)/,
+                    replace: "$self.shouldHideDirectMessagesTab()||$1"
                 }
             ]
         },
