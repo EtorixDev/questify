@@ -7,7 +7,7 @@
 import { classNameFactory } from "@api/Styles";
 import { getIntlMessageFromHash, runtimeHashMessageKey, runtimeHashMessageKeyLegacy } from "@utils/index";
 import { Logger } from "@utils/Logger";
-import { findByCodeLazy, findStoreLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, UserStore } from "@webpack/common";
 
 import { questIsIgnored, settings } from "../settings";
@@ -17,7 +17,7 @@ export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
 const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
 export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback ?? (() => { })); }
-export const QuestsStore = findStoreLazy("QuestStore");
+export const QuestsStore = findByPropsLazy("claimedQuests");
 export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;
