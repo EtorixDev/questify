@@ -17,7 +17,7 @@ export const q = classNameFactory("questify-");
 export const QuestifyLogger = new Logger("Questify");
 const AudioPlayerConstructor = findByCodeLazy("sound has no duration");
 export function AudioPlayer(name: string, volume: number = 1, callback?: () => void): any { return new AudioPlayerConstructor(name, null, volume, "default", callback ?? (() => { })); }
-export const QuestsStore = findStoreLazy("QuestsStore");
+export const QuestsStore = findStoreLazy("QuestStore");
 export const questPath = "/quest-home";
 export const leftClick = 0;
 export const middleClick = 1;
