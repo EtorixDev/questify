@@ -1098,7 +1098,7 @@ export default definePlugin({
         },
         {
             // Adds a maxDigits prop to the LowerBadge component which allows for not truncating, or for truncating at a specific threshold.
-            find: "STATUS_DANGER,disableColor",
+            find: '"renderBadgeCount"])',
             group: true,
             replacement: [
                 {
@@ -1276,7 +1276,7 @@ export default definePlugin({
                 },
                 {
                     // Add the trigger to the memo for rerendering the progress label.
-                    match: /(\i.intl.string\(\i.\i#{intl::QUESTS_SEE_CODE}\)}\)}},\[)/,
+                    match: /(\)}}},\[)/,
                     replace: "$1questRerenderTrigger,"
                 },
                 {
