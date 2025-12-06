@@ -9,18 +9,22 @@ Available natively in [Equicord](https://github.com/Equicord/Equicord), a Vencor
 ## Features
 1. Quest Features
     - Modify specific Quest features.
-    - Allows for disabling the following Quest related features:
+    - Allows for disabling the following Quest-related features:
         - Everything — All of the below is disabled.
-        - Discovery Tab — Quests tab becomes hidden.
         - Fetching Quests — Will prevent fetching Quests resulting in a blank Quests page.
+        - DMs Quests Tab — Disable the Quests tab in DMs. This is where it is properly located as of now.
         - Badge on User Profiles — Hides the profile badge which doubles as a shortcut to the Quests page.
         - Popup Above User Panel — Hides the new Quest promotion that appears above your profile panel.
+        - Discovery Tab Relocation Notice — Hides the Quest tab in Discovery which displays a redirect notice to the new Quests page.
         - Gift Inventory Relocation Notice — Hides the text in the gift inventory which doubles as a shortcut to the Quests page.
+        - Quests Page Sponsored Banner — Disable the large banner on the Quests page that displays a sponsored Quest.
         - Friends List Active Now Promotion — Hides the promotion that displays when your friends play a game which has an active Quest.
-    - Allows for modifying the following Quest related features:
-        - Complete Video Quests in Background — Click the watch button on video Quests and wait for the video duration to pass. The first click will start the Quest without opening the video modal. Subsequent clicks will show the modal as normal.
-        - Complete Game Quests in Background — Click the accept button on game Quests and wait for the play duration to pass.
+        - Members List Actively Playing Icon — Hides the icon in the members list that shows when someone is actively playing a game with an active Quest.
+    - Allows for modifying the following Quest-related features:
         - Make Mobile Quests Desktop Compatible — Make mobile-only video Quests completable on Desktop.
+        - Complete Game Quests in Background — Click the accept button on game Quests and wait for the play duration to pass.
+        - Complete Video Quests in Background — Click the watch button on video Quests and wait for the video duration to pass. The first click will start the Quest without opening the video modal. Subsequent clicks will show the modal as normal.
+        - Notify on Auto-Complete — Receive a notification when a Quest is automatically completed in the background.
 2. Quests Button
     - Show a Quest button in the server list with an optional indicator for unclaimed Quests.
     - Button Visibility
@@ -32,6 +36,12 @@ Available natively in [Equicord](https://github.com/Equicord/Equicord), a Vencor
         - Badge — Shows the number of unclaimed Quests as a "ping" badge.
         - Both — Both of the above.
         - None — Show no indication of unclaimed Quests.
+    - Included Reward Types: Only count Quests with these rewards in the indicator logic
+        - Orbs
+        - Nitro Codes
+        - Reward Codes
+        - In Game Items
+        - Profile Collectibles
     - Badge Color
         - Use the color picker to pick a custom badge color or use the default Discord ping badge color by clicking `Disable`.
     - Left / Middle / Right Click Actions
@@ -49,6 +59,7 @@ Available natively in [Equicord](https://github.com/Equicord/Equicord), a Vencor
     - Alert Sound
         - Pick a default Discord sound to play when new Quests are fetched, or provide a custom audio URL. The audio must be hosted on a domain whitelisted by the Vencord CSP, such as `catbox`.
         - If the provided URL is not on a supported domain, you will receive an error. If it *is* on a supported domain, but the audio file is invalid, it will silently fail. To ensure your audio file plays fine, click the audio preview button in the plugin settings.
+        - Chose a volume from 0-100 for the alert sound.
 4. Restyle Quests
     - Highlight Quests with optional theme colors for visibility.
     - Unclaimed / Claimed / Ignored / Expired
@@ -68,3 +79,7 @@ Available natively in [Equicord](https://github.com/Equicord/Equicord), a Vencor
     - Ignored Quest Profile
         - Share ignored quests between accounts on a single client or keep them separate.
         - Ignore Quests by opening their context menu and selecting `Mark as Ignored`.
+    - Remember Sort Choice
+        - Don't reset to the default sorting option each time you visit the Quests page.
+    - Remember Filter Choice
+        - Don't reset to the default filter options each time you visit the Quests page.

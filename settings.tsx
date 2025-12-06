@@ -370,6 +370,7 @@ function validateDisableQuestSetting() {
         disableQuestsDiscoveryTab,
         disableQuestsFetchingQuests,
         disableQuestsDirectMessagesTab,
+        disableQuestsPageSponsoredBanner,
         disableQuestsPopupAboveAccountPanel,
         disableQuestsBadgeOnUserProfiles,
         disableQuestsGiftInventoryRelocationNotice,
@@ -380,6 +381,7 @@ function validateDisableQuestSetting() {
         "disableQuestsDiscoveryTab",
         "disableQuestsFetchingQuests",
         "disableQuestsDirectMessagesTab",
+        "disableQuestsPageSponsoredBanner",
         "disableQuestsPopupAboveAccountPanel",
         "disableQuestsBadgeOnUserProfiles",
         "disableQuestsGiftInventoryRelocationNotice",
@@ -387,7 +389,7 @@ function validateDisableQuestSetting() {
         "disableMembersListActivelyPlayingIcon"
     ]);
 
-    if (disableQuestsDiscoveryTab || disableQuestsDirectMessagesTab || disableQuestsFetchingQuests || disableQuestsPopupAboveAccountPanel || disableQuestsBadgeOnUserProfiles || disableQuestsGiftInventoryRelocationNotice || disableFriendsListActiveNowPromotion || disableMembersListActivelyPlayingIcon) {
+    if (disableQuestsDiscoveryTab || disableQuestsDirectMessagesTab || disableQuestsPageSponsoredBanner || disableQuestsFetchingQuests || disableQuestsPopupAboveAccountPanel || disableQuestsBadgeOnUserProfiles || disableQuestsGiftInventoryRelocationNotice || disableFriendsListActiveNowPromotion || disableMembersListActivelyPlayingIcon) {
         settings.store.disableQuestsEverything = false;
     }
 }
@@ -675,6 +677,7 @@ function DisableQuestsSetting(): JSX.Element {
         disableQuestsDiscoveryTab,
         disableQuestsFetchingQuests,
         disableQuestsDirectMessagesTab,
+        disableQuestsPageSponsoredBanner,
         disableQuestsPopupAboveAccountPanel,
         disableQuestsBadgeOnUserProfiles,
         disableQuestsGiftInventoryRelocationNotice,
@@ -689,6 +692,7 @@ function DisableQuestsSetting(): JSX.Element {
         "disableQuestsDiscoveryTab",
         "disableQuestsFetchingQuests",
         "disableQuestsDirectMessagesTab",
+        "disableQuestsPageSponsoredBanner",
         "disableQuestsPopupAboveAccountPanel",
         "disableQuestsBadgeOnUserProfiles",
         "disableQuestsGiftInventoryRelocationNotice",
@@ -708,6 +712,7 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Popup Above User Panel", value: "popup", selected: disableQuestsPopupAboveAccountPanel, type: "disable" },
         { label: "Disable Discovery Tab Relocation Notice", value: "discovery", selected: disableQuestsDiscoveryTab, type: "disable" },
         { label: "Disable Gift Inventory Relocation Notice", value: "inventory", selected: disableQuestsGiftInventoryRelocationNotice, type: "disable" },
+        { label: "Disable Sponsored Banner on Quests Page", value: "sponsored-banner", selected: disableQuestsPageSponsoredBanner, type: "disable" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, type: "disable" },
         { label: "Disable Members List Actively Playing Icon", value: "members-list", selected: disableMembersListActivelyPlayingIcon, type: "disable" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" },
@@ -737,6 +742,7 @@ function DisableQuestsSetting(): JSX.Element {
         settings.store.disableQuestsDiscoveryTab = enabledValues.includes("discovery");
         settings.store.disableQuestsFetchingQuests = enabledValues.includes("fetching");
         settings.store.disableQuestsDirectMessagesTab = enabledValues.includes("dms");
+        settings.store.disableQuestsPageSponsoredBanner = enabledValues.includes("sponsored-banner");
         settings.store.disableQuestsPopupAboveAccountPanel = enabledValues.includes("popup");
         settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
         settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
@@ -1627,6 +1633,12 @@ export const settings = definePluginSettings({
     disableQuestsDirectMessagesTab: {
         type: OptionType.BOOLEAN,
         description: "Disable Quest tab in Direct Messages.",
+        default: false,
+        hidden: true
+    },
+    disableQuestsPageSponsoredBanner: {
+        type: OptionType.BOOLEAN,
+        description: "Disable the sponsored banner on the Quest page.",
         default: false,
         hidden: true
     },
