@@ -1112,7 +1112,7 @@ export default definePlugin({
                 },
                 {
                     // Makes use of the custom prop if provided, otherwise assume default behavior.
-                    match: /(?<=variant:.{0,20}?,children:)(.{0,30}?\]\))/,
+                    match: /(\i.intl.string\(\i.\i#{intl::NO_RESULTS_FOUND}\))/,
                     replace: "arguments[0]?.feedback??$1"
                 }
             ]
@@ -1297,7 +1297,7 @@ export default definePlugin({
                 },
                 {
                     // Add the trigger to the memo for rerendering the progress label.
-                    match: /(\)}}},\[)/,
+                    match: /(\i\.intl\.string\(\i\.\i#{intl::QUESTS_SEE_CODE}\)\}\)\}\},\[|\)\}\}\},\[)/,
                     replace: "$1questRerenderTrigger,"
                 },
                 {
@@ -1333,7 +1333,7 @@ export default definePlugin({
                     // The "Quest Accepted" text is changed to "Resume" if the Quest is in progress but not active.
                     // Then, when the Quest Accepted button is clicked, resume the automatic completion of the
                     // Quest and disable the button again.
-                    match: /(?<=secondary",)disabled:!0,text:(.{0,30}?\]\)),/,
+                    match: /(?<=secondary",)disabled:!0,text:(\i\.intl\.string\(\i\.\i#{intl::QUEST_ACCEPTED}\)),/,
                     replace: "...$self.getQuestAcceptedButtonProps(arguments[0].quest,$1),"
                 },
                 {
