@@ -1042,7 +1042,7 @@ export default definePlugin({
         {
             // Same as above, probably? Not sure when
             // each function is used, so patching both.
-            find: "iconOnly)},",
+            find: '"StackedActivityStatus"})',
             group: true,
             replacement: [
                 {
