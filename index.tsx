@@ -922,6 +922,12 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
     };
 }
 
+function isIncompatibleActivity(quest: Quest): boolean {
+    return !!Object.keys(quest.config.taskConfigV2?.tasks || {}).some(taskType => {
+        return "ACHIEVEMENT_IN_ACTIVITY" === taskType;
+    });
+}
+
 export default definePlugin({
     // Used to quickly test the userplugin separately
     // from the Equicord version during development.
@@ -951,6 +957,7 @@ export default definePlugin({
     processQuestForAutoComplete,
     getQuestAcceptedButtonProps,
     getQuestAcceptedButtonText,
+    isIncompatibleActivity,
     getQuestPanelOverride,
     setLastFilterChoices,
     getLastFilterChoices,
@@ -1303,7 +1310,7 @@ export default definePlugin({
                     // Start Play Game Quests.
                     // Video Quests are handled in the next patch group.
                     match: /(?<=onClick:async\(\)=>{)/,
-                    replace: "const startingAutoComplete=arguments[0].isVideoQuest?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
+                    replace: "const startingAutoComplete=(arguments[0].isVideoQuest||$self.isIncompatibleActivity(arguments[0].quest))?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
                     // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.
