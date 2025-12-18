@@ -886,6 +886,25 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
     return null;
 }
 
+function getQuestUnccceptedButtonText(quest: Quest): string | null {
+    const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
+    const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
+    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
+    const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
+    const target = playType?.target || watchType?.target || achievementType?.target || 0;
+    const targetFormatted = `${String(Math.floor(target / 60)).padStart(2, "0")}:${String(target % 60).padStart(2, "0")}`;
+
+    if (target > 0) {
+        if ((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground)) {
+            return `Complete (${targetFormatted})`;
+        } else if (achievementType && completeAchievementQuestsInBackground) {
+            return "Complete (Immediate)";
+        }
+    }
+
+    return null;
+}
+
 function getQuestAcceptedButtonText(quest: Quest): string | null {
     const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
@@ -905,13 +924,13 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
             if (!!intervalData) {
                 return timeRemaining ? `Completing (${progressFormatted})` : "Completing...";
             } else if (watchType || (playType && IS_DISCORD_DESKTOP)) {
-                return `Resume (~${progressFormatted})`;
+                return timeRemaining === duration ? `Complete (${progressFormatted})` : `Resume (${progressFormatted})`;
             }
         } else if (achievementType && completeAchievementQuestsInBackground) {
             if (!!intervalData) {
                 return "Completing...";
             } else {
-                return "Complete";
+                return "Complete (Immediate)";
             }
         }
     }
@@ -1052,6 +1071,7 @@ export default definePlugin({
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
     shouldHideMembersListActivelyPlayingIcon,
+    getQuestUnccceptedButtonText,
     processQuestForAutoComplete,
     getQuestAcceptedButtonProps,
     getQuestAcceptedButtonText,
@@ -1406,8 +1426,8 @@ export default definePlugin({
                 {
                     // Start Play Game and Play Activity Quests.
                     // Video Quests are handled in the next patch group.
-                    match: /(?<=onClick:async\(\)=>{)/,
-                    replace: "const startingAutoComplete=arguments[0].isVideoQuest?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
+                    match: /(\i,tooltipText:null,onClick:async\(\)=>{)/,
+                    replace: "$self.getQuestUnccceptedButtonText(arguments[0].quest)??$1const startingAutoComplete=arguments[0].isVideoQuest?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
                     // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.

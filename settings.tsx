@@ -1696,9 +1696,9 @@ export const settings = definePluginSettings({
                         activeQuestIntervals.delete(questId);
                     }
                 });
-
-                rerenderQuests();
             }
+
+            rerenderQuests();
         }
     },
     completeGameQuestsInBackground: {
@@ -1715,9 +1715,9 @@ export const settings = definePluginSettings({
                         activeQuestIntervals.delete(questId);
                     }
                 });
-
-                rerenderQuests();
             }
+
+            rerenderQuests();
         },
     },
     completeAchievementQuestsInBackground: {
@@ -1734,9 +1734,9 @@ export const settings = definePluginSettings({
                         activeQuestIntervals.delete(questId);
                     }
                 });
-
-                rerenderQuests();
             }
+
+            rerenderQuests();
         }
     },
     notifyOnQuestComplete: {
