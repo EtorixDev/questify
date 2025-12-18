@@ -816,11 +816,15 @@ function DisableQuestsSetting(): JSX.Element {
                         will wait for the duration of the Game Quest and mark it as completed automatically. This option is only supported
                         on the official desktop client.
                         <br /><br />
-                        You still must start the Quests manually. The first click will start the Quests in the background.
-                        For Video Quests, subsequent clicks will open the video modal as normal. To abort the Quests, you
-                        can open the context menu on the Quest tile and select <span className={q("inline-code-block")}>Stop Auto-Complete</span>.
+                        The <span className={q("inline-code-block")}>Complete Achievement Quests in Background</span> option
+                        will immediately mark Achievement Quests as completed when started.
                         <br /><br />
-                        Using either of those options is against Discord's TOS. Use at your own risk.
+                        You still must start the Quests manually. The first click will start the Quests in the background.
+                        For Video Quests, subsequent clicks will open the video modal as normal. For Activity Quests, subsequent clicks
+                        will open the activity as normal. To abort the Quests, you can open the context menu on the Quest tile and
+                        select <span className={q("inline-code-block")}>Stop Auto-Complete</span>.
+                        <br /><br />
+                        Using any of the Auto-Complete options is against Discord's TOS. Use at your own risk.
                     </Forms.FormText>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
