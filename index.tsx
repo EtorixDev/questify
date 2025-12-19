@@ -1051,22 +1051,6 @@ export default definePlugin({
             ]
         },
         {
-            // Same as above, probably? Not sure when
-            // each function is used, so patching both.
-            find: '"StackedActivityStatus"})',
-            group: true,
-            replacement: [
-                {
-                    match: /(?=if\(\i\)return null;let \i=function)/,
-                    replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
-                },
-                {
-                    match: /(?<=}\),\i\(\),\i&&)/,
-                    replace: "!shouldHideMembersListActivelyPlayingIcon&&"
-                }
-            ]
-        },
-        {
             // Hides the Quest badge on user profiles.
             find: ".MODAL]:26",
             group: true,
