@@ -886,7 +886,7 @@ function shouldDisableQuestAcceptedButton(quest: Quest): boolean | null {
     return null;
 }
 
-function getQuestUnccceptedButtonText(quest: Quest): string | null {
+function getQuestUnacceptedButtonText(quest: Quest): string | null {
     const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
     const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
@@ -909,22 +909,28 @@ function getQuestAcceptedButtonText(quest: Quest): string | null {
     const { completeGameQuestsInBackground, completeVideoQuestsInBackground, completeAchievementQuestsInBackground } = settings.store;
     const questEnrolledAt = quest.userStatus?.enrolledAt ? new Date(quest.userStatus.enrolledAt) : null;
     const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
+    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE || quest.config.taskConfigV2?.tasks.WATCH_VIDEO;
     const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
     const intervalData = activeQuestIntervals.get(quest.id);
 
     if (questEnrolledAt) {
         if (((playType && completeGameQuestsInBackground) || (watchType && completeVideoQuestsInBackground))) {
             const taskType = playType || watchType;
-            const duration = taskType?.target || 0;
+            const duration = taskType?.target;
+
+            if (!duration) {
+                return null;
+            }
+
             const progress = Math.min((intervalData?.progress ?? (quest.userStatus?.progress?.[taskType?.type || ""]?.value || 0)), duration);
             const timeRemaining = Math.max(0, duration - progress);
+            const canCompleteImmediately = watchType && questEnrolledAt && ((new Date().getTime() - questEnrolledAt.getTime()) / 1000) >= duration;
             const progressFormatted = `${String(Math.floor(timeRemaining / 60)).padStart(2, "0")}:${String(timeRemaining % 60).padStart(2, "0")}`;
 
             if (!!intervalData) {
-                return timeRemaining ? `Completing (${progressFormatted})` : "Completing...";
+                return !canCompleteImmediately && timeRemaining ? `Completing (${progressFormatted})` : "Completing...";
             } else if (watchType || (playType && IS_DISCORD_DESKTOP)) {
-                return timeRemaining === duration ? `Complete (${progressFormatted})` : `Resume (${progressFormatted})`;
+                return canCompleteImmediately ? "Complete (Immediate)" : timeRemaining === duration ? `Complete (${progressFormatted})` : `Resume (${progressFormatted})`;
             }
         } else if (achievementType && completeAchievementQuestsInBackground) {
             if (!!intervalData) {
@@ -1027,10 +1033,6 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
         "ACHIEVEMENT_IN_ACTIVITY"
     ];
 
-    const playType = quest.config.taskConfigV2?.tasks.PLAY_ON_DESKTOP || quest.config.taskConfigV2?.tasks.PLAY_ON_XBOX || quest.config.taskConfigV2?.tasks.PLAY_ON_PLAYSTATION || quest.config.taskConfigV2?.tasks.PLAY_ACTIVITY;
-    const watchType = quest.config.taskConfigV2?.tasks.WATCH_VIDEO || quest.config.taskConfigV2?.tasks.WATCH_VIDEO_ON_MOBILE;
-    const achievementType = quest.config.taskConfigV2?.tasks.ACHIEVEMENT_IN_ACTIVITY;
-
     if (!Array.from(validTasks).some(taskType => Object.values(quest.config.taskConfigV2?.tasks || {}).some(task => task.type === taskType))) {
         return {
             disabled: disabled,
@@ -1071,7 +1073,7 @@ export default definePlugin({
     shouldHideGiftInventoryRelocationNotice,
     shouldHideFriendsListActiveNowPromotion,
     shouldHideMembersListActivelyPlayingIcon,
-    getQuestUnccceptedButtonText,
+    getQuestUnacceptedButtonText,
     processQuestForAutoComplete,
     getQuestAcceptedButtonProps,
     getQuestAcceptedButtonText,
@@ -1411,7 +1413,7 @@ export default definePlugin({
                     // Start Play Game and Play Activity Quests.
                     // Video Quests are handled in the next patch group.
                     match: /(\i,tooltipText:null,onClick:async\(\)=>{)/,
-                    replace: "$self.getQuestUnccceptedButtonText(arguments[0].quest)??$1const startingAutoComplete=arguments[0].isVideoQuest?false:!$self.processQuestForAutoComplete(arguments[0].quest);"
+                    replace: "$self.getQuestUnacceptedButtonText(arguments[0].quest)??$1const startingAutoComplete=arguments[0].isVideoQuest?false:$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
                     // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.
