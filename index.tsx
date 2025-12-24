@@ -1412,11 +1412,12 @@ export default definePlugin({
                 {
                     // Start Play Game and Play Activity Quests.
                     // Video Quests are handled in the next patch group.
+                    // Also set the unaccepted button text to "Complete".
                     match: /(\i,tooltipText:null,onClick:async\(\)=>{)/,
                     replace: "$self.getQuestUnacceptedButtonText(arguments[0].quest)??$1const startingAutoComplete=arguments[0].isVideoQuest?false:$self.processQuestForAutoComplete(arguments[0].quest);"
                 },
                 {
-                    // The "Resume (XX:XX)" text is changed to "Watching (XX:XX)" if the Quest is active.
+                    // Set the accepted button text to "Complete", "Completing", or "Resume" based on progress.
                     match: /(if\(\i\)return{text:)/,
                     replace: "$1$self.getQuestAcceptedButtonText(arguments[0].quest)??",
                 },
@@ -1431,7 +1432,7 @@ export default definePlugin({
                     replace: "$1questRerenderTrigger,"
                 },
                 {
-                    // Stop Play Activity Quests from launching the activity.
+                    // Stop Play Activity Quests from launching the activity on first click.
                     match: /(?<=,)(\i\(\))(\)}};)/,
                     replace: "!startingAutoComplete&&$1$2"
                 }
