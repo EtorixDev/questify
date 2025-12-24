@@ -22,8 +22,9 @@ Available natively in [Equicord](https://github.com/Equicord/Equicord), a Vencor
         - Members List Actively Playing Icon — Hides the icon in the members list that shows when someone is actively playing a game with an active Quest.
     - Allows for modifying the following Quest-related features:
         - Make Mobile Quests Desktop Compatible — Make mobile-only video Quests completable on Desktop.
-        - Complete Game Quests in Background — Click the accept button on game Quests and wait for the play duration to pass.
-        - Complete Video Quests in Background — Click the watch button on video Quests and wait for the video duration to pass. The first click will start the Quest without opening the video modal. Subsequent clicks will show the modal as normal.
+        - Complete Watch Video Quests in Background — Click the watch button on watch video Quests and wait for the video duration to pass. The first click will start the Quest without opening the video modal. Subsequent clicks will show the modal as normal.
+        - Complete Play Game/Activity Quests in Background — Click the accept button on play game/activity Quests and wait for the play duration to pass.
+        - Complete Task in Activity Quests in Background — Click the accept button on task in activity Quests and it will be completed immediately.
         - Notify on Auto-Complete — Receive a notification when a Quest is automatically completed in the background.
 2. Quests Button
     - Show a Quest button in the server list with an optional indicator for unclaimed Quests.

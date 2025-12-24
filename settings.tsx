@@ -717,9 +717,9 @@ function DisableQuestsSetting(): JSX.Element {
         { label: "Disable Sponsored Banner on Quests Page", value: "sponsored-banner", selected: disableQuestsPageSponsoredBanner, type: "disable" },
         { label: "Disable Friends List Active Now Promotion", value: "friends-list", selected: disableFriendsListActiveNowPromotion, type: "disable" },
         { label: "Disable Members List Actively Playing Icon", value: "members-list", selected: disableMembersListActivelyPlayingIcon, type: "disable" },
-        { label: "Complete Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground, type: "modification" },
-        { label: "Complete Game Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground, type: "modification" },
-        { label: "Complete Achievement Quests in Background", value: "achievement-quests-background", selected: completeAchievementQuestsInBackground, type: "modification" },
+        { label: "Complete Watch Video Quests in Background", value: "video-quests-background", selected: completeVideoQuestsInBackground, type: "modification" },
+        { label: "Complete Play Game/Activity Quests in Background", value: "game-quests-background", selected: completeGameQuestsInBackground, type: "modification" },
+        { label: "Complete Task in Activity Quests in Background", value: "achievement-quests-background", selected: completeAchievementQuestsInBackground, type: "modification" },
         { label: "Make Mobile Quests Desktop Compatible", value: "mobile-desktop-compatible", selected: makeMobileQuestsDesktopCompatible, type: "modification" },
         { label: "Notify on Auto-Complete", value: "notify-on-complete", selected: notifyOnQuestComplete, type: "modification" },
     ];
@@ -812,12 +812,12 @@ function DisableQuestsSetting(): JSX.Element {
                         The <span className={q("inline-code-block")}>Complete Video Quests in Background</span> option
                         will wait for the duration of the Video Quest and mark it as completed automatically.
                         <br /><br />
-                        Similarly, the <span className={q("inline-code-block")}>Complete Play Game Quests in Background</span> option
+                        Similarly, the <span className={q("inline-code-block")}>Complete Play Game/Activity Quests in Background</span> option
                         will wait for the duration of the Game Quest and mark it as completed automatically. This option is only supported
                         on the official desktop client.
                         <br /><br />
-                        The <span className={q("inline-code-block")}>Complete Achievement Quests in Background</span> option
-                        will immediately mark Achievement Quests as completed when started.
+                        The <span className={q("inline-code-block")}>Complete Task in Activity Quests in Background</span> option
+                        will immediately mark Task in Activity Quests as completed when started.
                         <br /><br />
                         You still must start the Quests manually. The first click will start the Quests in the background.
                         For Video Quests, subsequent clicks will open the video modal as normal. For Activity Quests, subsequent clicks

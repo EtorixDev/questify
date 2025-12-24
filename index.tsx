@@ -18,7 +18,7 @@ import { addIgnoredQuest, addRerenderCallback, autoFetchCompatible, fetchAndAler
 import { ExcludedQuestMap, GuildlessServerListItem, Quest, QuestIcon, QuestMap, QuestStatus, RGB } from "./utils/components";
 import { adjustRGB, decimalToRGB, fetchAndDispatchQuests, formatLowerBadge, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, leftClick, middleClick, normalizeQuestName, q, QuestifyLogger, questPath, QuestsStore, refreshQuest, reportPlayGameQuestProgress, reportVideoQuestProgress, rightClick, setIgnoredQuestIDs, waitUntilEnrolled } from "./utils/misc";
 
-const QuestifyNative = VencordNative.pluginHelpers.QuestifyUserPlugin as PluginNative<typeof import("./native")>;
+const QuestifyNative = VencordNative.pluginHelpers.Questify as PluginNative<typeof import("./native")>;
 const patchedMobileQuests = new Set<string>();
 export const activeQuestIntervals = new Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; duration: number, type: string; }>();
 
@@ -84,7 +84,7 @@ export function QuestButton(): JSX.Element {
         if (todo === "open-quests") {
             NavigationRouter.transitionTo(questPath);
         } else if (todo === "plugin-settings") {
-            openPluginModal(Vencord.Plugins.plugins.QuestifyUserPlugin);
+            openPluginModal(Vencord.Plugins.plugins.Questify);
         } else if (todo === "context-menu") {
             ContextMenuApi.openContextMenu(event, () => (
                 <Menu.Menu
@@ -1051,7 +1051,7 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
 }
 
 export default definePlugin({
-    name: "QuestifyUserPlugin",
+    name: "Questify",
     description: "Enhance your Quest experience with a suite of features, or disable them entirely if they're not your thing.",
     authors: [{ name: "Etorix", id: 94597845868355584n }],
     dependencies: ["ServerListAPI"],
