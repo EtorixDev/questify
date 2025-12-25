@@ -1068,7 +1068,7 @@ function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boole
     ];
 
     const validTask = Array.from(validTasks).some(taskType => Object.values(quest.config.taskConfigV2?.tasks || {}).some(
-        task => task.type === taskType && (taskType !== "WATCH_VIDEO_ON_MOBILE" || settings.store.makeMobileQuestsDesktopCompatible)
+        task => task.type === taskType && (task.type !== "WATCH_VIDEO_ON_MOBILE" || settings.store.makeMobileQuestsDesktopCompatible)
     ));
 
     if (!validTask) {
