@@ -9,6 +9,7 @@ import "./styles.css";
 import { showNotification } from "@api/Notifications";
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
 import { ErrorBoundary, openPluginModal } from "@components/index";
+import { copyToClipboard } from "@utils/index";
 import definePlugin, { PluginNative, StartAt } from "@utils/types";
 import { onceReady } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, RestAPI, useEffect, useState } from "@webpack/common";
@@ -281,6 +282,11 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
                     }}
                 />
             }
+            <Menu.MenuItem
+                id={q("copy-quest-id")}
+                label="Copy Quest ID"
+                action={() => { copyToClipboard(props.quest.id); }}
+            />
         </Menu.MenuGroup>
     ));
 }
@@ -846,11 +852,11 @@ async function startAchievementActivityProgressTracking(quest: Quest, questTarge
     }
 
     const result = await QuestifyNative.complete(appID, authCode!, questTarget);
+    activeQuestIntervals.delete(quest.id);
 
     if (!result.success) {
         const errorReason = result.error || "An error occurred while completing the Quest.";
         QuestifyLogger.error(`[${getFormattedNow()}] Failed to complete Quest ${questName}:`, errorReason);
-        activeQuestIntervals.delete(quest.id);
         return;
     } else {
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
