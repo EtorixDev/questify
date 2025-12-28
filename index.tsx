@@ -584,6 +584,7 @@ async function startVideoProgressTracking(quest: Quest, questTarget: number): Pr
         const enrollmentTimeout = 60000;
         const enrolled = await waitUntilEnrolled(quest, enrollmentTimeout, 15, QuestifyLogger);
         quest = refreshQuest(quest);
+
         if (!enrolled) {
             QuestifyLogger.warn(`[${getFormattedNow()}] Quest ${questName} not enrolled within ${enrollmentTimeout / 1000} seconds.`);
             activeQuestIntervals.delete(quest.id);
@@ -606,6 +607,7 @@ async function startVideoProgressTracking(quest: Quest, questTarget: number): Pr
 
         if (success) {
             QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
+
             if (settings.store.notifyOnQuestComplete) {
                 showNotification({
                     title: "Quest Completed!",
