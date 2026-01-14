@@ -243,12 +243,12 @@ function shouldHideMembersListActivelyPlayingIcon(): boolean {
     return disableMembersListActivelyPlayingIcon || disableQuestsEverything;
 }
 
-function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; }, isClaimedMenu: boolean = false): void {
+function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; }): void {
     const isIgnored = questIsIgnored(props.quest.id);
 
     children.unshift((
         <Menu.MenuGroup>
-            {!isClaimedMenu && (!isIgnored ? (
+            {!isIgnored ? (
                 <Menu.MenuItem
                     id={q("ignore-quests")}
                     label="Mark as Ignored"
@@ -260,7 +260,7 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
                     label="Unmark as Ignored"
                     action={() => { removeIgnoredQuest(props.quest.id); }}
                 />
-            ))}
+            )}
             {activeQuestIntervals.has(props.quest.id) &&
                 <Menu.MenuItem
                     id={q("stop-auto-complete")}
@@ -1527,8 +1527,7 @@ export default definePlugin({
 
     contextMenus: {
         "quests-entry": QuestTileContextMenu,
-        "downloadify-active-quest-context-menu": QuestTileContextMenu,
-        "downloadify-claimed-quest-context-menu": (children, props) => QuestTileContextMenu(children, props, true)
+        "downloadify-active-quest-context-menu": QuestTileContextMenu
     },
 
     flux: {
