@@ -1368,7 +1368,11 @@ export default definePlugin({
             ]
         },
         {
-            // Adds a feedback prop to the SearchableSelect component which will display on invalid searches.
+            // MARK: TODO
+            //  - Cleanup once Discord rolls out the new mana select completely.
+            //  - Also see anywhere DynamicDropdown is used for refactoring.
+            //
+            // Various patches to the SearchableSelect component.
             find: '"onSearchChange",',
             group: true,
             replacement: [
@@ -1391,6 +1395,32 @@ export default definePlugin({
                     // Prevent SearchableSelect from force-scrolling into view, causing the dropdown to close.
                     match: /(?<=\.scrollIntoView\()/,
                     replace: "{block:\"nearest\",inline:\"nearest\"}"
+                },
+                {
+                    // Passes a popoutClassName and optionClassName to the popout handler.
+                    match: /(?<=renderOptionPrefix:\i,renderOptionSuffix:\i)/,
+                    replace: ",popoutClassName:arguments[0]?.popoutClassName,optionClassName:arguments[0]?.optionClassName"
+                },
+                {
+                    // Makes use of the custom popoutClassName prop if provided.
+                    match: /(?<=onKeyDown"]\);return.{0,30}?className:\i\(\)\()/,
+                    replace: "arguments[0]?.popoutClassName,"
+                },
+                {
+                    // Passes the custom optionClassName prop to the row renderer.
+                    match: /(?<="aria-posinset":\i,"aria-setsize":\i.length,)/,
+                    replace: "optionClassName:arguments[0]?.optionClassName,"
+                },
+                {
+                    // Makes use of the custom optionClassName prop if provided.
+                    match: /(?<=focusProps:{enabled:!1},className:\i\(\)\()/,
+                    replace: "arguments[0]?.optionClassName,"
+                },
+                {
+                    // Pass the unused props to the new mana select being
+                    // used by dev://experiment/2025-09-mana-desktop-select
+                    match: /(?<=closeOnSelect:\i)(?=})/,
+                    replace: ",...arguments[0]"
                 }
             ]
         },

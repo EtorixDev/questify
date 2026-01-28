@@ -5,11 +5,11 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
-import { Divider, ErrorBoundary } from "@components/index";
+import { Divider, ErrorBoundary, Heading, Paragraph } from "@components/index";
 import { Logger } from "@utils/Logger";
 import { makeRange, OptionType } from "@utils/types";
 import { findLazy } from "@webpack";
-import { Button, ColorPicker, ContextMenuApi, Forms, Menu, Select, Slider, TextInput, useEffect, useRef, useState } from "@webpack/common";
+import { Button, ColorPicker, ContextMenuApi, Menu, Select, Slider, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
@@ -450,7 +450,7 @@ function QuestButtonSettings(): JSX.Element {
         { label: "Profile Collectibles", value: "collectibles", selected: questRewardIncludeCollectibles },
     ];
 
-    const [currentRewardsOptions, setCurrentRewardsOptions] = useState(questButtonRewardDisplayOptions.filter(option => option.selected));
+    const [currentRewardsOptions, setCurrentRewardsOptions] = useState(questButtonRewardDisplayOptions.filter(option => option.selected).map(option => option.value));
     const [currentQuestButtonDisplay, setCurrentQuestButtonDisplay] = useState((questButtonDisplayOptions.find(option => option.value === questButtonDisplay) as RadioOption));
     const [currentQuestButtonUnclaimed, setCurrentQuestButtonUnclaimed] = useState((questButtonUnclaimedOptions.find(option => option.value === questButtonUnclaimed) as RadioOption));
     const [currentQuestButtonLeftClickAction, setCurrentQuestButtonLeftClickAction] = useState<"open-quests" | "plugin-settings" | "context-menu" | "nothing">(questButtonLeftClickAction as "open-quests" | "plugin-settings" | "context-menu" | "nothing");
@@ -459,37 +459,37 @@ function QuestButtonSettings(): JSX.Element {
     const [currentBadgeColor, setCurrentBadgeColor] = useState((questButtonBadgeColor as number | null));
     const [dummySelected, setDummySelected] = useState(false);
 
-    function updateSettingsTruthy(enabled: DynamicDropdownSettingOption[]) {
-        const enabledValues = enabled.map(option => option.value);
-
+    function updateSettingsTruthy(enabled: string[]) {
         questButtonRewardDisplayOptions.forEach(option => {
-            option.selected = enabledValues.includes(option.value);
+            option.selected = enabled.includes(option.value);
         });
 
-        settings.store.questRewardIncludeRewardCode = enabledValues.includes("reward-code");
-        settings.store.questRewardIncludeNitroCode = enabledValues.includes("nitro-code");
-        settings.store.questRewardIncludeCollectibles = enabledValues.includes("collectibles");
-        settings.store.questRewardIncludeInGame = enabledValues.includes("in-game");
-        settings.store.questRewardIncludeOrbs = enabledValues.includes("orbs");
+        settings.store.questRewardIncludeRewardCode = enabled.includes("reward-code");
+        settings.store.questRewardIncludeNitroCode = enabled.includes("nitro-code");
+        settings.store.questRewardIncludeCollectibles = enabled.includes("collectibles");
+        settings.store.questRewardIncludeInGame = enabled.includes("in-game");
+        settings.store.questRewardIncludeOrbs = enabled.includes("orbs");
 
         setCurrentRewardsOptions(enabled);
         validateAndOverwriteIgnoredQuests();
     }
 
     function handleQuestRewardDisplayChange(values: Array<DynamicDropdownSettingOption | string>) {
+        const parsedValues = values.map(v => typeof v === "string" ? questButtonRewardDisplayOptions.find(option => option.value === v) as DynamicDropdownSettingOption : v);
+
         if (values.length === 0) {
             updateSettingsTruthy([]);
             return;
         }
 
-        const stringlessValues = values.filter(v => typeof v !== "string") as DynamicDropdownSettingOption[];
-        const selectedOption = values.find(v => typeof v === "string") as string;
+        const selectedOption = values.length > currentRewardsOptions.length ? values[values.length - 1] as string : currentRewardsOptions.find(v => !values.includes(v)) as string;
+        const stringlessValues = parsedValues.filter(v => v.value !== selectedOption);
         const option = questButtonRewardDisplayOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
 
         if (option.selected) {
-            updateSettingsTruthy(stringlessValues.filter(v => v.value !== selectedOption));
+            updateSettingsTruthy(stringlessValues.filter(v => v.value !== selectedOption).map(v => v.value));
         } else {
-            updateSettingsTruthy([...stringlessValues, option]);
+            updateSettingsTruthy([...stringlessValues.map(v => v.value), option.value]);
         }
     }
 
@@ -532,12 +532,12 @@ function QuestButtonSettings(): JSX.Element {
                 <div>
                     <div className={q("main-inline-group")}>
                         <div>
-                            <Forms.FormTitle className={q("form-title")}>
+                            <Heading className={q("form-title")}>
                                 Quest Button
-                            </Forms.FormTitle>
-                            <Forms.FormText className={q("form-description")}>
+                            </Heading>
+                            <Paragraph className={q("form-description")}>
                                 Show a Quest button in the server list with an optional indicator for unclaimed Quests.
-                            </Forms.FormText>
+                            </Paragraph>
                         </div>
                         <div className={q("dummy-quest-button")}>
                             <DummyQuestButton
@@ -555,9 +555,9 @@ function QuestButtonSettings(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Left Click Action
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={questButtonClickOptions}
                                 className={q("select", "titled-select")}
@@ -568,9 +568,9 @@ function QuestButtonSettings(): JSX.Element {
                             />
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Middle Click Action
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={questButtonClickOptions}
                                 className={q("select", "titled-select")}
@@ -581,9 +581,9 @@ function QuestButtonSettings(): JSX.Element {
                             />
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Right Click Action
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={questButtonClickOptions}
                                 className={q("select", "titled-select")}
@@ -596,17 +596,17 @@ function QuestButtonSettings(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Button Visibility
-                            </Forms.FormTitle>
+                            </Heading>
                             <RadioGroup
                                 value={(currentQuestButtonDisplay as any).value}
                                 options={questButtonDisplayOptions}
                                 onChange={handleQuestButtonDisplayChange}
                             />
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Badge Color
-                            </Forms.FormTitle>
+                            </Heading>
                             <div className={q("sub-inline-group")}>
                                 <ColorPicker
                                     color={currentBadgeColor}
@@ -628,9 +628,9 @@ function QuestButtonSettings(): JSX.Element {
                             </div>
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Unclaimed Indicator
-                            </Forms.FormTitle>
+                            </Heading>
                             <RadioGroup
                                 value={(currentQuestButtonUnclaimed as any).value}
                                 options={questButtonUnclaimedOptions}
@@ -640,21 +640,23 @@ function QuestButtonSettings(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Included Reward Types
-                            </Forms.FormTitle>
-                            <Forms.FormText className={q("form-description")}>
+                            </Heading>
+                            <Paragraph className={q("form-description", "margin-bottom-8")}>
                                 Only count Quests with these reward types as unclaimed when determining button
                                 visibility, badge count, and when playing the alert sound.
-                            </Forms.FormText>
+                            </Paragraph>
                             <DynamicDropdown
                                 placeholder="Select which reward types to include in the unclaimed count..."
                                 feedback="There's no supported Quest feature by that name."
                                 className={q("select")}
+                                optionClassName={q("affixless-select-popout-option")}
                                 maxVisibleItems={questButtonRewardDisplayOptions.length}
+                                maxOptionsVisible={questButtonRewardDisplayOptions.length} // Mana Select Prop
                                 clearable={true}
                                 multi={true}
-                                value={currentRewardsOptions as any}
+                                value={currentRewardsOptions}
                                 options={questButtonRewardDisplayOptions}
                                 onChange={handleQuestRewardDisplayChange}
                                 closeOnSelect={false}
@@ -726,70 +728,73 @@ function DisableQuestsSetting(): JSX.Element {
     const disableOptions = options.filter(option => option.type === "disable");
     const modificationOptions = options.filter(option => option.type === "modification");
     const everythingOnly = options.find(option => option.value === "everything") as DynamicDropdownSettingOption;
-    const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected));
+    const [currentValue, setCurrentValue] = useState(options.filter(option => option.selected).map(option => option.value));
 
-    function updateSettingsTruthy(enabled: DynamicDropdownSettingOption[]) {
-        const enabledValues = enabled.map(option => option.value);
-
+    function updateSettingsTruthy(enabled: string[]) {
         options.forEach(option => {
-            option.selected = enabledValues.includes(option.value);
+            option.selected = enabled.includes(option.value);
         });
 
         const redoAutoFetch = (
-            settings.store.disableQuestsEverything !== enabledValues.includes("everything") ||
-            settings.store.disableQuestsFetchingQuests !== enabledValues.includes("fetching")
+            settings.store.disableQuestsEverything !== enabled.includes("everything") ||
+            settings.store.disableQuestsFetchingQuests !== enabled.includes("fetching")
         );
 
-        settings.store.disableQuestsEverything = enabledValues.includes("everything");
-        settings.store.disableQuestsDiscoveryTab = enabledValues.includes("discovery");
-        settings.store.disableQuestsFetchingQuests = enabledValues.includes("fetching");
-        settings.store.disableQuestsDirectMessagesTab = enabledValues.includes("dms");
-        settings.store.disableQuestsPageSponsoredBanner = enabledValues.includes("sponsored-banner");
-        settings.store.disableQuestsPopupAboveAccountPanel = enabledValues.includes("popup");
-        settings.store.disableQuestsBadgeOnUserProfiles = enabledValues.includes("badge");
-        settings.store.disableQuestsGiftInventoryRelocationNotice = enabledValues.includes("inventory");
-        settings.store.disableFriendsListActiveNowPromotion = enabledValues.includes("friends-list");
-        settings.store.disableMembersListActivelyPlayingIcon = enabledValues.includes("members-list");
-        settings.store.makeMobileQuestsDesktopCompatible = enabledValues.includes("mobile-desktop-compatible");
-        settings.store.completeVideoQuestsInBackground = enabledValues.includes("video-quests-background");
-        settings.store.completeGameQuestsInBackground = enabledValues.includes("game-quests-background");
-        settings.store.completeAchievementQuestsInBackground = enabledValues.includes("achievement-quests-background");
-        settings.store.notifyOnQuestComplete = enabledValues.includes("notify-on-complete");
+        settings.store.disableQuestsEverything = enabled.includes("everything");
+        settings.store.disableQuestsDiscoveryTab = enabled.includes("discovery");
+        settings.store.disableQuestsFetchingQuests = enabled.includes("fetching");
+        settings.store.disableQuestsDirectMessagesTab = enabled.includes("dms");
+        settings.store.disableQuestsPageSponsoredBanner = enabled.includes("sponsored-banner");
+        settings.store.disableQuestsPopupAboveAccountPanel = enabled.includes("popup");
+        settings.store.disableQuestsBadgeOnUserProfiles = enabled.includes("badge");
+        settings.store.disableQuestsGiftInventoryRelocationNotice = enabled.includes("inventory");
+        settings.store.disableFriendsListActiveNowPromotion = enabled.includes("friends-list");
+        settings.store.disableMembersListActivelyPlayingIcon = enabled.includes("members-list");
+        settings.store.makeMobileQuestsDesktopCompatible = enabled.includes("mobile-desktop-compatible");
+        settings.store.completeVideoQuestsInBackground = enabled.includes("video-quests-background");
+        settings.store.completeGameQuestsInBackground = enabled.includes("game-quests-background");
+        settings.store.completeAchievementQuestsInBackground = enabled.includes("achievement-quests-background");
+        settings.store.notifyOnQuestComplete = enabled.includes("notify-on-complete");
 
         redoAutoFetch ? checkAutoFetchInterval(settings.store.fetchingQuestsInterval) : null;
-        setCurrentValue(enabled);
+        setCurrentValue(enabled.map(value => typeof value === "string" ? value : (value as any).value));
     }
 
     function handleChange(values: Array<DynamicDropdownSettingOption | string>) {
+        const parsedValues = values.map(v => typeof v === "string" ? options.find(option => option.value === v) as DynamicDropdownSettingOption : v);
+
         if (values.length === 0) {
             updateSettingsTruthy([]);
             return;
         }
 
-        const stringlessValues = values.filter(v => typeof v !== "string") as DynamicDropdownSettingOption[];
-        const selectedOption = values.find(v => typeof v === "string") as string;
+        const selectedOption = values.length > currentValue.length ? values[values.length - 1] as string : currentValue.find(v => !values.includes(v)) as string;
+        const stringlessValues = parsedValues.filter(v => v.value !== selectedOption);
 
         if (selectedOption === "everything") {
-            if (everythingOnly.selected) { // If was already selected when clicked.
-                updateSettingsTruthy([...stringlessValues.filter(option => option.type !== "disable")]);
+            if (everythingOnly.selected) {
+                // If was already selected when clicked.
+                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption).map(option => option.value));
             } else {
-                updateSettingsTruthy([...stringlessValues.filter(option => option.type !== "disable"), everythingOnly]);
+                updateSettingsTruthy([...stringlessValues.filter(option => option.type !== "disable").map(option => option.value), selectedOption]);
             }
         } else if (disableOptions.some(option => option.value === selectedOption)) {
             const option = disableOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
 
-            if (option.selected) { // If was already selected when clicked.
-                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption && option.value !== everythingOnly.value));
+            if (option.selected) {
+                // If was already selected when clicked.
+                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption).map(option => option.value));
             } else {
-                updateSettingsTruthy([...stringlessValues.filter(option => option.value !== everythingOnly.value), option]);
+                updateSettingsTruthy([...stringlessValues.map(option => option.value), selectedOption]);
             }
         } else if (modificationOptions.some(option => option.value === selectedOption)) {
             const option = modificationOptions.find(option => option.value === selectedOption) as DynamicDropdownSettingOption;
 
-            if (option.selected) { // If was already selected when clicked.
-                updateSettingsTruthy(stringlessValues.filter(option => option.value !== selectedOption));
+            if (option.selected) {
+                // If was already selected when clicked.
+                updateSettingsTruthy(stringlessValues.map(option => option.value));
             } else {
-                updateSettingsTruthy([...stringlessValues, option]);
+                updateSettingsTruthy([...stringlessValues.map(option => option.value), selectedOption]);
             }
         }
     }
@@ -799,10 +804,10 @@ function DisableQuestsSetting(): JSX.Element {
             <Divider className={q("setting-divider")} />
             <div className={q("setting", "disable-quests-setting")}>
                 <div>
-                    <Forms.FormTitle className={q("form-title")}>
+                    <Heading className={q("form-title")}>
                         Quest Features
-                    </Forms.FormTitle>
-                    <Forms.FormText className={q("form-description")}>
+                    </Heading>
+                    <Paragraph className={q("form-description", "margin-bottom-8")}>
                         Modify specific Quest features.
                         <br /><br />
                         The <span className={q("inline-code-block")}>Disable Quest Popup Above Account Panel</span> option
@@ -824,15 +829,17 @@ function DisableQuestsSetting(): JSX.Element {
                         select <span className={q("inline-code-block")}>Stop Auto-Complete</span>.
                         <br /><br />
                         Using any of the Auto-Complete options is against Discord's TOS. Use at your own risk.
-                    </Forms.FormText>
+                    </Paragraph>
                     <DynamicDropdown
                         placeholder="Select which Quest features to modify."
                         feedback="There's no supported Quest feature by that name."
                         className={q("select")}
+                        optionClassName={q("affixless-select-popout-option")}
                         maxVisibleItems={options.length}
+                        maxOptionsVisible={options.length} // Mana Select Prop
                         clearable={true}
                         multi={true}
-                        value={currentValue as any}
+                        value={currentValue}
                         options={options}
                         onChange={handleChange}
                         closeOnSelect={false}
@@ -982,20 +989,20 @@ function RestyleQuestsSetting() {
             <div className={q("setting", "restyle-quests-setting")}>
                 <div>
                     <div>
-                        <Forms.FormTitle className={q("form-title")}>
+                        <Heading className={q("form-title")}>
                             Restyle Quests
-                        </Forms.FormTitle>
-                        <Forms.FormText className={q("form-description")}>
+                        </Heading>
+                        <Paragraph className={q("form-description")}>
                             Highlight Quests with optional theme colors for visibility.
                             <br /><br />
                             Claimed and Expired Quest styles will take precedence even if a Quest is ignored.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("gradient-setting-group", "inline-group-item", "flex-35")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Gradient Style
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={gradientOptions}
                                 className={q("select", "titled-select")}
@@ -1006,9 +1013,9 @@ function RestyleQuestsSetting() {
                             />
                         </div>
                         <div className={q("preload-setting-group", "inline-group-item", "flex-65")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Asset Preload
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={preloadOptions}
                                 className={q("select", "titled-select")}
@@ -1025,9 +1032,9 @@ function RestyleQuestsSetting() {
                                 key={label}
                                 className={q("inline-group-item", "color-picker-group")}
                             >
-                                <Forms.FormTitle className={q("form-subtitle")}>
+                                <Heading className={q("form-subtitle")}>
                                     {label}
-                                </Forms.FormTitle>
+                                </Heading>
                                 <div className={q("color-picker-with-buttons")}>
                                     <ColorPicker
                                         color={value}
@@ -1118,14 +1125,14 @@ function ReorderQuestsSetting(): JSX.Element {
             <div className={q("setting", "reorder-quests-setting")}>
                 <div>
                     <div>
-                        <Forms.FormTitle className={q("form-title")}>
+                        <Heading className={q("form-title")}>
                             Reorder Quests
-                        </Forms.FormTitle>
-                        <Forms.FormText className={q("form-description")}>
+                        </Heading>
+                        <Paragraph className={q("form-description")}>
                             Sort Quests by their status. Applied when the "Questify" sort option is selected on the Quest page.
                             <br /><br />
                             Comma-separated list must contain all of: <span className={q("inline-code-block")}>UNCLAIMED, CLAIMED, IGNORED, EXPIRED</span>.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div>
                         <TextInput
@@ -1155,9 +1162,9 @@ function ReorderQuestsSetting(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Unclaimed Subsort
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={getSubsortOptions("unclaimed")}
                                 className={q("select", "titled-select")}
@@ -1170,9 +1177,9 @@ function ReorderQuestsSetting(): JSX.Element {
                             />
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Claimed Subsort
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={getSubsortOptions("claimed")}
                                 className={q("select", "titled-select")}
@@ -1187,9 +1194,9 @@ function ReorderQuestsSetting(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Ignored Subsort
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={getSubsortOptions("ignored")}
                                 className={q("select", "titled-select")}
@@ -1202,9 +1209,9 @@ function ReorderQuestsSetting(): JSX.Element {
                             />
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Expired Subsort
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={getSubsortOptions("expired")}
                                 className={q("select", "titled-select")}
@@ -1219,9 +1226,9 @@ function ReorderQuestsSetting(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Ignored Quest Profile
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={[
                                     { label: "Shared: All accounts on this client share ignores.", value: "shared" },
@@ -1237,9 +1244,9 @@ function ReorderQuestsSetting(): JSX.Element {
                     </div>
                     <div className={q("main-inline-group")}>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Remember Sort Choice
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={[
                                     { label: "Yes", value: true },
@@ -1253,9 +1260,9 @@ function ReorderQuestsSetting(): JSX.Element {
                             />
                         </div>
                         <div className={q("inline-group-item")}>
-                            <Forms.FormTitle className={q("form-subtitle")}>
+                            <Heading className={q("form-subtitle")}>
                                 Remember Filter Choice
-                            </Forms.FormTitle>
+                            </Heading>
                             <Select
                                 options={[
                                     { label: "Yes", value: true },
@@ -1270,11 +1277,11 @@ function ReorderQuestsSetting(): JSX.Element {
                         </div>
                     </div>
                     <div className={q("main-inline-group")}>
-                        <Forms.FormText className={q("form-description")}>
+                        <Paragraph className={q("form-description")}>
                             This sort and filter choice refers to the built-in sort and filter options on the Quest page.
                             The custom sorting above is only applied when the "Questify" sort option is selected on the Quest page.
                             If remembering is disabled, the sort or filter options will be reset each time you open the Quest page.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                 </div>
             </div>
@@ -1357,24 +1364,27 @@ function FetchingQuestsSetting(): JSX.Element {
         };
     }
 
-    function getAllIntervalOptions(currentValue: SelectOption) {
-        const otherOptions = resolvedIntervals.filter(option => option.value !== currentValue.value);
+    function getAllIntervalOptions(currentValue: number) {
+        const currentOption = createIntervalSelectOptionFromValue(currentValue);
+        const otherOptions = resolvedIntervals.filter(option => option.value !== currentValue);
 
         return [
-            currentValue,
+            currentOption,
             ...otherOptions
         ].sort((a, b) => Number(a.value) - Number(b.value));
     }
 
-    function getAllAlertOptions(currentValue: SelectOption | null) {
-        const otherOptions = currentValue ? resolvedSounds.filter(option => option.value !== currentValue.value) : resolvedSounds;
+    function getAllAlertOptions(currentValue: string | null) {
+        const otherOptions = currentValue ? resolvedSounds.filter(option => option.value !== currentValue) : resolvedSounds;
 
         if (!currentValue) {
             return otherOptions.sort((a, b) => a.label.localeCompare(b.label));
         }
 
+        const currentOption = createAlertSelectOptionFromValue(currentValue);
+
         return [
-            currentValue,
+            currentOption!,
             ...otherOptions
         ].sort((a, b) => a.label.localeCompare(b.label));
     }
@@ -1473,10 +1483,10 @@ function FetchingQuestsSetting(): JSX.Element {
     }
 
     const resolvedIntervalValue = fetchingQuestsInterval;
-    const [currentIntervalSelection, setCurrentSelection] = useState(createIntervalSelectOptionFromValue(resolvedIntervalValue));
+    const [currentIntervalSelection, setCurrentSelection] = useState(resolvedIntervalValue);
     const [currentIntervalOptions, setCurrentIntervalOptions] = useState(getAllIntervalOptions(currentIntervalSelection));
     const resolvedAlertValue = fetchingQuestsAlert;
-    const [currentAlertSelection, setCurrentAlertSelection] = useState<SelectOption | null>(createAlertSelectOptionFromValue(resolvedAlertValue));
+    const [currentAlertSelection, setCurrentAlertSelection] = useState<string | null>(resolvedAlertValue);
     const [currentAlertOptions, setCurrentAlertOptions] = useState(getAllAlertOptions(currentAlertSelection));
     // Needed to update the playing state of the preview button.
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -1501,10 +1511,10 @@ function FetchingQuestsSetting(): JSX.Element {
             <div className={q("setting", "fetching-quests-setting")}>
                 <div>
                     <div>
-                        <Forms.FormTitle className={q("form-title")}>
+                        <Heading className={q("form-title")}>
                             Fetching Quests
-                        </Forms.FormTitle>
-                        <Forms.FormText className={q("form-description")}>
+                        </Heading>
+                        <Paragraph className={q("form-description")}>
                             Configure how often to fetch Quests from Discord and set up alerts for new Quests.
                             <br /><br />
                             By default, Discord only fetches Quests on load and when visiting the Quests page.
@@ -1515,13 +1525,13 @@ function FetchingQuestsSetting(): JSX.Element {
                             unclaimed <span className={q("inline-code-block")}>Pill</span>, <span className={q("inline-code-block")}>Badge</span>, or <span className={q("inline-code-block")}>Both</span> indicators enabled. Otherwise, there is no reason to periodically fetch Quests.
                             <br /><br />
                             Also, if <span className={q("inline-code-block")}>Fetching Quests</span> is blocked in the <span className={q("inline-code-block")}>Quest Features</span> setting, this will not work.
-                        </Forms.FormText>
+                        </Paragraph>
                     </div>
                     <div>
                         <div>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Fetch Interval
-                            </Forms.FormTitle>
+                            </Heading>
                         </div>
                         <div>
                             <DynamicDropdown
@@ -1530,6 +1540,7 @@ function FetchingQuestsSetting(): JSX.Element {
                                 feedback="Intervals must be between 30 minutes and 12 hours."
                                 className={q("select", "titled-select")}
                                 maxVisibleItems={resolvedIntervals.length + 1}
+                                maxOptionsVisible={resolvedIntervals.length + 1}
                                 clearable={false}
                                 multi={false}
                                 value={currentIntervalSelection as any}
@@ -1538,21 +1549,21 @@ function FetchingQuestsSetting(): JSX.Element {
                                 onSearchChange={handleScaleSearchChange}
                                 onClose={() => { setCurrentIntervalOptions(getAllIntervalOptions(currentIntervalSelection)); }}
                                 onChange={value => {
-                                    const option = currentIntervalOptions.find(o => o.value === value) as SelectOption;
-                                    settings.store.fetchingQuestsInterval = option.value as number;
+                                    const val = value as number;
+                                    settings.store.fetchingQuestsInterval = val;
 
-                                    setCurrentSelection(option);
-                                    setCurrentIntervalOptions(getAllIntervalOptions(option));
-                                    checkAutoFetchInterval(option.value as number);
+                                    setCurrentSelection(val);
+                                    setCurrentIntervalOptions(getAllIntervalOptions(val));
+                                    checkAutoFetchInterval(val);
                                 }}
                             />
                         </div>
                     </div>
                     <div>
                         <div>
-                            <Forms.FormTitle className={q("form-subtitle", "form-subtitle-spacier")}>
+                            <Heading className={q("form-subtitle", "form-subtitle-spacier")}>
                                 Alert Sound
-                            </Forms.FormTitle>
+                            </Heading>
                         </div>
                         <div className={q("sub-inline-group")}>
                             <div className={q("inline-group-item")}>
@@ -1570,28 +1581,28 @@ function FetchingQuestsSetting(): JSX.Element {
                                     onSearchChange={handleAlertSearchChange}
                                     onClose={() => { setCurrentAlertOptions(getAllAlertOptions(currentAlertSelection)); }}
                                     onChange={value => {
-                                        const option = currentAlertOptions.find(o => o.value === value) as SelectOption;
-                                        settings.store.fetchingQuestsAlert = value ? option.value as string : null as any;
+                                        const val = value as string | null;
+                                        settings.store.fetchingQuestsAlert = val as any;
 
-                                        setCurrentAlertSelection(value ? option : null);
-                                        setCurrentAlertOptions(getAllAlertOptions(option));
+                                        setCurrentAlertSelection(val);
+                                        setCurrentAlertOptions(getAllAlertOptions(val));
                                     }}
                                 />
                             </div>
                             <div
                                 className={q("inline-group-item", "alert-icon", { "playing-audio": !!isPlaying })}
                                 onClick={() => {
-                                    if (currentAlertSelection?.value) {
+                                    if (currentAlertSelection) {
                                         if (activePlayer.current) {
                                             clearActivePlayer();
                                         } else {
-                                            activePlayer.current = AudioPlayer(currentAlertSelection.value as string, settings.store.fetchingQuestsAlertVolume / 100, clearActivePlayer);
+                                            activePlayer.current = AudioPlayer(currentAlertSelection, settings.store.fetchingQuestsAlertVolume / 100, clearActivePlayer);
                                             activePlayer.current?.play();
                                             setIsPlaying(true);
                                         }
                                     }
                                 }}
-                                style={{ cursor: currentAlertSelection && currentAlertSelection.value ? "pointer" : "default" }}
+                                style={{ cursor: currentAlertSelection ? "pointer" : "default" }}
                             >
                                 {SoundIcon(24, 24)}
                             </div>
