@@ -1368,7 +1368,7 @@ export default definePlugin({
             ]
         },
         {
-            // MARK: TODO
+            // MARK: TODO 1
             //  - Cleanup once Discord rolls out the new mana select completely.
             //  - Also see anywhere DynamicDropdown is used for refactoring.
             //
@@ -1575,11 +1575,9 @@ export default definePlugin({
                 replace: "showPlaceholder:false"
             }
         },
+        // MARK: TODO 2 START
+        //  - Cleanup once Discord rolls out the new quest CTA refactor completely.
         {
-            // MARK: TODO
-            //  - Cleanup once Discord rolls out the new quest CTA refactor completely.
-            //  - See new entry point in 2nd patch group below.
-            //
             // Sets intervals to progress Play Game Quests in the background and patches some common click handlers.
             find: "IN_PROGRESS:if(",
             group: true,
@@ -1635,8 +1633,8 @@ export default definePlugin({
                     replace: "const questifyText=$self.getQuestUnacceptedButtonText(arguments[0].quest);"
                 },
                 {
-                    match: /(?<="primary",onClick:\(\)=>{null==\i\|\|\i\(\),)/,
-                    replace: "!$self.processQuestForAutoComplete(arguments[0].quest)&&"
+                    match: /(?<=}\),)(null==\i\|\|\i\(\))/,
+                    replace: "!$self.processQuestForAutoComplete(arguments[0].quest)&&($1)"
                 },
                 {
                     match: /(?<=,text:)(?=\i)/,
@@ -1671,6 +1669,7 @@ export default definePlugin({
                 }
             ]
         },
+        // MARK: TODO 2 END
         {
             // Prevents the new Quests location from counting as part of the
             // DM button highlight logic while the Quest button is visible.
