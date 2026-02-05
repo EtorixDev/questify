@@ -1423,10 +1423,16 @@ export default definePlugin({
         {
             // Formats the Orbs balance on the Quests page with locale string formatting.
             find: '("BalanceCounter")',
-            replacement: {
-                match: /(?<=`\$\{\i).toFixed\(0\)(?=\}`)/,
-                replace: ".toLocaleString(undefined,{maximumFractionDigits:0})"
-            }
+            replacement: [
+                {
+                    match: /(`\${(\i).toFixed\(0\)}`.length)/,
+                    replace: "$1+($2>=1e6?0.8:$2>=1e3?0.4:0)"
+                },
+                {
+                    match: /(?<=children:\i.to\(\i=>`\${\i)(.toFixed\(0\))/,
+                    replace: ".toLocaleString(undefined,{maximumFractionDigits:0})"
+                }
+            ]
         },
         {
             // Adds a maxDigits prop to the LowerBadge component which allows for not truncating, or for truncating at a specific threshold.
