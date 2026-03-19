@@ -1286,7 +1286,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=resetSortingFiltering\(\)},\[\]\);)/,
+                    match: /(?<=scrollToQuest\(\i\)\}\)\},\[\]\);)/,
                     replace: "const shouldHideSponsoredQuestBanner=$self.shouldHideSponsoredQuestBanner();"
                 },
                 {
@@ -1603,7 +1603,7 @@ export default definePlugin({
             // Whether preloading assets is enabled or not, the placeholders loading
             // before the assets causes a lot of element shifting, whereas if
             // the elements load immediately instead, it doesn't.
-            find: ",{rewardWithArticleHook:()",
+            find: ".LEARN_MORE_CTA_AND_EXPRESSIVE_BUTTON_TREATMENT_FOUR_OPEN_GAME_LINK,sourceQuestContent:",
             replacement: {
                 match: /showPlaceholder:!\i/,
                 replace: "showPlaceholder:false"
