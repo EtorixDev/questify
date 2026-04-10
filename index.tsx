@@ -279,6 +279,14 @@ function QuestTileContextMenu(children: React.ReactNode[], props: { quest: any; 
                             clearInterval(interval.progressTimeout);
                             clearTimeout(interval.rerenderTimeout);
                             activeQuestIntervals.delete(props.quest.id);
+
+                            if (interval.type === "play") {
+                                void reportPlayGameQuestProgress(refreshQuest(props.quest), true, QuestifyLogger, {
+                                    attempts: 3,
+                                    delay: 2500,
+                                });
+                            }
+
                             resetQuestsToResume(props.quest);
                             rerenderQuests();
                         }
@@ -817,9 +825,18 @@ async function startPlayGameProgressTracking(quest: Quest, target: { raw: number
         }
     }
 
-    function handleQuestComplete(): void {
+    async function sendTerminalHeartbeat(): Promise<void> {
+        await reportPlayGameQuestProgress(refreshQuest(quest), true, QuestifyLogger, {
+            attempts: 3,
+            delay: 2500,
+        });
+    }
+
+    async function handleQuestComplete(): Promise<void> {
         clearTrackingTimers();
         activeQuestIntervals.delete(quest.id);
+
+        await sendTerminalHeartbeat();
         QuestifyLogger.info(`[${getFormattedNow()}] Quest ${questName} completed.`);
 
         if (settings.store.notifyOnQuestComplete) {
@@ -852,7 +869,7 @@ async function startPlayGameProgressTracking(quest: Quest, target: { raw: number
             }
 
             if (result.completed || result.progress >= questTarget) {
-                handleQuestComplete();
+                await handleQuestComplete();
                 return;
             }
 
@@ -896,7 +913,7 @@ async function startPlayGameProgressTracking(quest: Quest, target: { raw: number
     }
 
     if (initial.completed || initial.progress >= questTarget) {
-        handleQuestComplete();
+        await handleQuestComplete();
         return;
     }
 
@@ -2007,6 +2024,15 @@ export default definePlugin({
         }
 
         activeQuestIntervals.forEach((intervalData, questId) => {
+            const quest = QuestsStore.getQuest(questId);
+
+            if (intervalData.type === "play" && quest) {
+                void reportPlayGameQuestProgress(refreshQuest(quest), true, QuestifyLogger, {
+                    attempts: 3,
+                    delay: 2500,
+                });
+            }
+
             clearInterval(intervalData.progressTimeout);
             clearTimeout(intervalData.rerenderTimeout);
             activeQuestIntervals.delete(questId);

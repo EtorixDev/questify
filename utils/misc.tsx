@@ -348,7 +348,7 @@ export async function reportPlayGameQuestProgress(quest: Quest, terminal: boolea
     if (!quest.userStatus?.enrolledAt) {
         logger?.warn(`[${getFormattedNow()}] Cannot send heartbeat for unenrolled Quest ${questName}.`);
         return { progress: null, completed: false };
-    } else if (quest.userStatus?.completedAt) {
+    } else if (quest.userStatus?.completedAt && !terminal) {
         return { progress: null, completed: true };
     }
 
