@@ -1464,7 +1464,7 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
-                    match: /(?<=\i\)&&"xs"===\i;)/,
+                    match: /(?<=null&&"xs"===\i;)/,
                     replace: "const shouldHideMembersListActivelyPlayingIcon=$self.shouldHideMembersListActivelyPlayingIcon();"
                 },
                 {
