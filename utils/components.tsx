@@ -22,7 +22,7 @@ export const QuestTile = findComponentByCodeLazy(".rowIndex,trackGuildAndChannel
 
 export class ActiveQuestIntervalsMap extends Map<string, { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }> {
     set(key: string, value: { progressTimeout: NodeJS.Timeout; rerenderTimeout: NodeJS.Timeout; progress: number; type: string; }): this {
-        const resumeQuestIDs = settings.store.resumeQuestIDs;
+        const { resumeQuestIDs } = settings.store;
 
         settings.store.resumeQuestIDs = {
             watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
@@ -36,7 +36,7 @@ export class ActiveQuestIntervalsMap extends Map<string, { progressTimeout: Node
     }
 
     delete(key: string): boolean {
-        const resumeQuestIDs = settings.store.resumeQuestIDs;
+        const { resumeQuestIDs } = settings.store;
 
         settings.store.resumeQuestIDs = {
             watch: resumeQuestIDs.watch.filter((id: string) => id !== key),
