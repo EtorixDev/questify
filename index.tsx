@@ -1444,7 +1444,7 @@ export default definePlugin({
                     replace: "const shouldHideSponsoredQuestBanner=$self.shouldHideSponsoredQuestBanner();"
                 },
                 {
-                    match: /(?<=\i,{onAssetLoad:\i,onQuestCtaClick:\i)/,
+                    match: /(?<=\i,{onAssetLoad:\i,onQuestCtaClick:\i)(?=}\))/,
                     replace: ",shouldHideSponsoredQuestBanner"
                 },
                 {
