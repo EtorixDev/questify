@@ -1707,10 +1707,14 @@ export default definePlugin({
             group: true,
             replacement: [
                 {
+                    match: /(?<=let \i,)(?=.{0,160}?fetchPolicy:"cache-and-network",)/,
+                    replace: "questRerenderTrigger,questifySorted,"
+                },
+                {
                     // Run Questify's sort function every time due to hook requirements but return
                     // early if not applicable. If the sort method is set to "Questify", replace the
                     // Quests with the sorted ones. Also, setup a trigger to rerender the memo.
-                    match: /(?<=userStatus\?.claimedAt.{0,50})(\i.useMemo\(\(\)=>{)(?=if\(0===(\i).length\))/,
+                    match: /(?<=\.filters\),.{0,30})(\i.useMemo\(\(\)=>{)(?=if\(0===(\i).length\))/,
                     replace: "questRerenderTrigger=$self.useQuestRerender(),questifySorted=$self.sortQuests($2,arguments[1].sortMethod!==\"questify\"),$1if(arguments[1].sortMethod===\"questify\"){$2=questifySorted;};"
                 },
                 {
