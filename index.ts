@@ -11,7 +11,7 @@ import { Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import definePlugin, { StartAt } from "@utils/types";
 import type { Quest, QuestUserStatus } from "@vencord/discord-types";
-import { findByCodeLazy, findComponentByCodeLazy, onceReady } from "@webpack";
+import { onceReady } from "@webpack";
 import { QuestStore } from "@webpack/common";
 
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
@@ -55,7 +55,7 @@ function startPerAccountTasks(source: string): void {
     setOnQuestsPage();
     startAutoFetchingQuests();
     resumeAutoCompletesIfReady();
-    onceReady.then(() => { fetchAndDispatchQuests(); });
+    fetchAndDispatchQuests();
 
     QL.info(`START_TASKS-${source.toUpperCase()}`, { startedAt });
 }
@@ -80,8 +80,8 @@ function resumeAutoCompletesIfReady(): void {
     resumeInterruptedAutoCompletes();
 }
 
-const JSX = findByCodeLazy("null;if(void 0");
-const Button = findComponentByCodeLazy("BUTTON_LOADING_STARTED_LABEL)),");
+// const JSX = findByCodeLazy("null;if(void 0");
+// const Button = findComponentByCodeLazy("BUTTON_LOADING_STARTED_LABEL)),");
 
 export default definePlugin({
     name: "Questify",
@@ -91,8 +91,8 @@ export default definePlugin({
     startAt: StartAt.Init, // Needed in order to beat Read All Messages to inserting above the server list.
     settings,
 
-    JSX,
-    Button,
+    // JSX,
+    // Button,
 
     canOpenDevToolsWindow,
     canAutoCompleteQuest,
@@ -355,6 +355,11 @@ export default definePlugin({
             predicate: () => !settings.store.disableQuestsEverything && hasEnabledAutoCompleteQuestTypes(),
             replacement: [
                 {
+                    // Export JSX and Button for patch 3.
+                    match: /(?<="use strict";.{0,200}?var (\i)=\i\(\d+\),(\i)=\i\(\d+\),)/,
+                    replace: "questifyJSX=$1,questifyButton=$2,",
+                },
+                {
                     // Overwrite button props for UNENROLLED Quests.
                     match: /(?<=onClick:(\(\)=>{.[^}]+}),text:(\i),icon:\i,fullWidth:!0)/,
                     replace: ",...($self.getQuestButtonProps(arguments[0])??{})"
@@ -362,7 +367,7 @@ export default definePlugin({
                 {
                     // Overwrite button props for ENROLLED/INCOMPLETE Quests.
                     match: /(?<=return\(0,\i.\i\)\(\i.(\i).{0,350}?)(?=let{quest:\i,taskType:\i,surface:\i)/,
-                    replace: "const questifyButtonProps=$self.getQuestButtonProps(arguments[0]);if(questifyButtonProps){return (0,$self.JSX)($self.Button,{size:arguments[0].size,variant:'secondary',disabled:!1,fullWidth:!0,...questifyButtonProps})};"
+                    replace: "const questifyButtonProps=$self.getQuestButtonProps(arguments[0]);if(questifyButtonProps){return (0,questifyJSX.jsx)(questifyButton.$1,{size:arguments[0].size,variant:'secondary',disabled:!1,fullWidth:!0,...questifyButtonProps})};"
                 }
             ]
         },
@@ -381,26 +386,24 @@ export default definePlugin({
                     match: /(?<=SELECT,\i=)(?=\i&&)/,
                     replace: "!$self.canAutoCompleteQuest(arguments[0].quest)&&"
                 },
-                ...[
-                    // If this group becomes unruly due to Discord refactoring and is unfixable,
-                    // the 2nd & 3rd can be commented out in favor of just the 1st at the expense
-                    // of not seeing CTA buttons on completed but unclaimed Quests.
-                    {
-                        // Always expose the CTA button when available instead of only for videos and activities.
-                        match: /(?<=wrap:!1,children:\[)\i&&[^?]+/,
-                        replace: "!!arguments[0].quest.config.ctaConfig"
-                    },
-                    {
-                        // Let completed-but-expired claimable Quests with CTAs use the CTA-aware completed branch.
-                        match: /(?<=return\()\i.enabled&&\i===\i\.\i\.EXPIRED_CLAIMABLE&&\i\.\i\.has\(\i\)(?=\?\i=\(0,\i\.jsx\)\("div",\{className:\i\.\i,children:\(0,\i\.jsx\)\(\i\.A,\{quest:\i,surface:\i\.\i\.QUEST_HOME_TILE_FOOTER)/,
-                        replace: "!arguments[0].quest.config.ctaConfig&&$&"
-                    },
-                    {
-                        // Force the CTA-aware complete branch.
-                        match: /(?<=analyticsCtxQuestContentRowIndex:\i}\)}\):\i&&\i)(.{0,200}?fullWidth:!0}\)}\):)(\i.enabled)(.{0,50}?CLAIMED\))&&\i.\i.has\(\i\)(\?\i=)\i/,
-                        replace: "&&false$1arguments[0].quest.config.ctaConfig&&arguments[0].quest.userStatus?.completedAt&&!arguments[0].quest.userStatus?.claimedAt&&($2||true)$3$4true"
-                    }
-                ]
+                // If this group becomes unruly due to Discord refactoring and is unfixable,
+                // the 2nd & 3rd can be commented out in favor of just the 1st at the expense
+                // of not seeing CTA buttons on completed but unclaimed Quests.
+                {
+                    // Always expose the CTA button when available instead of only for videos and activities.
+                    match: /(?<=wrap:!1,children:\[)\i&&[^?]+/,
+                    replace: "!!arguments[0].quest.config.ctaConfig"
+                },
+                {
+                    // Let completed-but-expired claimable Quests with CTAs use the CTA-aware completed branch.
+                    match: /(?<=return\()(?=\i.enabled&&\i===\i\.\i\.EXPIRED_CLAIMABLE&&\i\.\i\.has\(\i\))/,
+                    replace: "!arguments[0].quest.config.ctaConfig&&"
+                },
+                {
+                    // Force the CTA-aware complete branch.
+                    match: /(?<=analyticsCtxQuestContentRowIndex:\i}\)}\):\i&&\i)(.{0,200}?fullWidth:!0}\)}\):)(\i.enabled)(.{0,50}?CLAIMED\))&&\i.\i.has\(\i\)(\?\i=)\i/,
+                    replace: "&&false$1arguments[0].quest.config.ctaConfig&&arguments[0].quest.userStatus?.completedAt&&!arguments[0].quest.userStatus?.claimedAt&&($2||true)$3$4true"
+                }
             ]
         },
         {
@@ -610,11 +613,15 @@ export default definePlugin({
 
     start() {
         initializeRestartTracking(settings);
+        addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
 
-        if (!settings.store.disableQuestsEverything) {
-            addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
-            startPerAccountTasks("PLUGIN_START");
-        }
+        onceReady.then(() => {
+            if (!settings.store.disableQuestsEverything) {
+                startPerAccountTasks("PLUGIN_START");
+            } else {
+                removeServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+            }
+        });
     },
 
     stop() {
