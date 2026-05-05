@@ -13,7 +13,7 @@ import definePlugin, { StartAt } from "@utils/types";
 import type { Quest, QuestUserStatus } from "@vencord/discord-types";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
 import { QuestStore } from "@webpack/common";
-import { JSX } from "react";
+import type { JSX } from "react";
 
 import { disguiseHomeButton, QuestButton, showQuestButton } from "./components/questButton";
 import { QuestTileContextMenu } from "./components/questTileContextMenu";
@@ -85,13 +85,16 @@ const Button = findComponentByCodeLazy("BUTTON_LOADING_STARTED_LABEL)),");
 
 function enrolledIncompleteButton(questifyButtonProps: QuestButtonPatchProps, size: string): JSX.Element {
     return (
-        <Button
-            size={size}
-            variant="secondary"
-            disabled={false}
-            fullWidth={false}
-            {...questifyButtonProps}
-        />);
+        <ErrorBoundary noop>
+            <Button
+                size={size}
+                variant="secondary"
+                disabled={false}
+                fullWidth={true}
+                {...questifyButtonProps}
+            />
+        </ErrorBoundary>
+    );
 }
 
 export default definePlugin({
