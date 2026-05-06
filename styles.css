@@ -15,6 +15,12 @@
     pointer-events: none;
 }
 
+/* Fix Questify button text clipping. */
+.questify-quest-item-restyle button [class*="buttonChildren"],
+.questify-quest-item-restyle button span {
+    overflow: visible;
+}
+
 /* Settings */
 
 .questify-setting {
