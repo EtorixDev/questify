@@ -23,6 +23,7 @@ Modify how Quests behave, hide Quest-related UI, or disable Quest functionality 
   - Friends List Promo
   - Members List Promo
   - Account Panel Promo
+  - Account Panel Quest Progress
   - Quest & Orbs Badges
 - Dangerous settings are gated behind a warning and confirmation.
   - Discord has warned users for modifying how Quests are completed.
