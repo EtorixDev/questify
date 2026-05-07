@@ -4,13 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Quest, QuestTaskWatchVideo, QuestTaskWatchVideoOnMobile } from "@vencord/discord-types";
-import { QuestTaskType } from "@vencord/discord-types/enums";
-
+import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { defaultClaimedSubsort, defaultExpiredSubsort, defaultIgnoredSubsort, defaultQuestOrder, defaultUnclaimedSubsort, type QuestOrderStatus, type QuestSubsort, type QuestTileColorSetting, type QuestTileGradient } from "../settings/def";
 import { getIgnoredQuestIDs } from "../settings/ignoredQuests";
-import { settings } from "../settings/store";
 import { getQuestStatus, QuestStatus } from "./questState";
+import { Quest, QuestTaskType, QuestTaskWatchVideo, QuestTaskWatchVideoOnMobile } from "./types";
 import { adjustRGB, decimalToRGB, isDarkish, q, type RGB } from "./ui";
 
 type QuestGroupKey = "claimed" | "expired" | "ignored" | "unclaimed" | "unknown";
@@ -84,7 +82,7 @@ function getGradientClass(gradient: QuestTileGradient): string | null {
 }
 
 export function getQuestTileClasses(originalClasses: string, quest: Quest & { dummyColor?: QuestTileColorSetting; }, gradientOverride?: QuestTileGradient): string {
-    const questTiles = settings.use([
+    const questTiles = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",
         "questTileUnclaimedColor",
@@ -127,7 +125,7 @@ export function getQuestTileClasses(originalClasses: string, quest: Quest & { du
 }
 
 export function getQuestTileStyle(quest: (Quest & { dummyColor?: QuestTileColorSetting; }) | null): Record<string, string> {
-    const questTiles = settings.use([
+    const questTiles = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",
         "questTileUnclaimedColor",
@@ -243,7 +241,7 @@ export function hasInjectedDesktopVideoCompatibility(quest?: Quest | string | nu
 }
 
 export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
-    const questSorting = settings.use([
+    const questSorting = useQuestifySettings([
         "disableQuestsEverything",
         "ignoredQuestIDs",
         "makeMobileVideoQuestsDesktopCompatible",
@@ -321,17 +319,19 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
 }
 
 export function shouldPreloadQuestAssets(): boolean {
-    return !settings.store.disableQuestsEverything && settings.store.questTilePreload;
+    const settings = getQuestifySettings();
+
+    return !settings.disableQuestsEverything && settings.questTilePreload;
 }
 
 export function getLastSortChoice(): string | null {
-    const { rememberQuestPageSort, lastQuestPageSort } = settings.store;
+    const { rememberQuestPageSort, lastQuestPageSort } = getQuestifySettings();
 
     return rememberQuestPageSort ? lastQuestPageSort : "questify";
 }
 
 export function setLastSortChoice(sort: string): void {
-    settings.store.lastQuestPageSort = sort || "questify";
+    getQuestifySettings().lastQuestPageSort = sort || "questify";
 }
 
 function getFilterChoiceKey({ group, filter }: { group: string; filter: string; }): string {
@@ -339,7 +339,7 @@ function getFilterChoiceKey({ group, filter }: { group: string; filter: string; 
 }
 
 export function getLastFilterChoices(): { group: string, filter: string; }[] | null {
-    const { rememberQuestPageFilters, lastQuestPageFilters } = settings.store;
+    const { rememberQuestPageFilters, lastQuestPageFilters } = getQuestifySettings();
 
     return rememberQuestPageFilters
         ? Object.values(lastQuestPageFilters).map(item => JSON.parse(JSON.stringify(item)))
@@ -348,7 +348,7 @@ export function getLastFilterChoices(): { group: string, filter: string; }[] | n
 
 export function setLastFilterChoices(filters: { group: string, filter: string; }[] | null): void {
     if (!filters?.length) {
-        settings.store.lastQuestPageFilters = {};
+        getQuestifySettings().lastQuestPageFilters = {};
 
         return;
     }
@@ -357,7 +357,7 @@ export function setLastFilterChoices(filters: { group: string, filter: string; }
         return;
     }
 
-    settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => {
+    getQuestifySettings().lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => {
         acc[getFilterChoiceKey(item)] = item;
 
         return acc;

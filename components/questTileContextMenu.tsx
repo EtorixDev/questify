@@ -5,13 +5,13 @@
  */
 
 import { copyToClipboard } from "@utils/index";
-import type { Quest } from "@vencord/discord-types";
 import { Menu } from "@webpack/common";
 import type { ReactNode } from "react";
 
 import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
 import { canAutoCompleteQuest, getQuestAutoCompleteEntry, processQuestForAutoComplete, stopQuestAutoComplete } from "../utils/completion";
+import type { Quest } from "../utils/types";
 import { q } from "../utils/ui";
 
 export function QuestTileContextMenu(

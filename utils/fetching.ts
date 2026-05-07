@@ -7,16 +7,16 @@
 import { showNotification } from "@api/Notifications";
 import { sleep } from "@utils/misc";
 import type { PluginNative } from "@utils/types";
-import type { Quest } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
-import { QuestStore, RestAPI } from "@webpack/common";
+import { RestAPI } from "@webpack/common";
 import { NavigationRouter } from "@webpack/common/utils";
 
+import { getQuestifySettings } from "../settings/access";
 import { questIsIgnored } from "../settings/ignoredQuests";
-import { settings } from "../settings/store";
 import { AudioPlayer } from "./audio";
 import { getNewQuests, normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes } from "./filtering";
 import { QL } from "./logging";
+import { type Quest, QuestStore } from "./types";
 import { QUEST_PAGE } from "./ui";
 
 export const AuthorizedAppsStore = findStoreLazy("AuthorizedAppsStore");
@@ -138,14 +138,15 @@ function notifyNewQuests(quests: Quest[], excluded: boolean): void {
 }
 
 export async function fetchAndAlertQuests(source: string): Promise<Quest[] | null> {
-    const alertSound = settings.store.newQuestAlertSound;
-    const alertVolume = settings.store.newQuestAlertVolume;
-    const excludedAlertSound = settings.store.newExcludedQuestAlertSound;
-    const excludedAlertVolume = settings.store.newExcludedQuestAlertVolume;
-    const shouldFetchExcludedQuests = settings.store.notifyOnNewExcludedQuests || Boolean(excludedAlertSound);
+    const settings = getQuestifySettings();
+    const alertSound = settings.newQuestAlertSound;
+    const alertVolume = settings.newQuestAlertVolume;
+    const excludedAlertSound = settings.newExcludedQuestAlertSound;
+    const excludedAlertVolume = settings.newExcludedQuestAlertVolume;
+    const shouldFetchExcludedQuests = settings.notifyOnNewExcludedQuests || Boolean(excludedAlertSound);
     const currentQuests = Array.from(QuestStore.quests.values());
     const currentExcludedQuestIds = new Set(Array.from(QuestStore.excludedQuests.values()).map(quest => quest.id));
-    const includedTypes = settings.store.questButtonIncludedTypes as QuestIncludedTypes;
+    const includedTypes = settings.questButtonIncludedTypes as QuestIncludedTypes;
 
     await fetchAndDispatchQuests();
     await sleep(1000);
@@ -172,8 +173,8 @@ export async function fetchAndAlertQuests(source: string): Promise<Quest[] | nul
     const newIncludedExcludedQuests = newExcludedQuests.filter(quest => questMatchesIncludedTypes(quest, includedTypes) && !questIsIgnored(quest.id));
     const shouldAlert = Boolean(alertSound) && newIncludedQuests.length > 0;
     const shouldAlertExcluded = Boolean(excludedAlertSound) && newIncludedExcludedQuests.length > 0;
-    const shouldNotify = settings.store.notifyOnNewQuests && newIncludedQuests.length > 0;
-    const shouldNotifyExcluded = settings.store.notifyOnNewExcludedQuests && newIncludedExcludedQuests.length > 0;
+    const shouldNotify = settings.notifyOnNewQuests && newIncludedQuests.length > 0;
+    const shouldNotifyExcluded = settings.notifyOnNewExcludedQuests && newIncludedExcludedQuests.length > 0;
 
     QL.info("FETCH_AND_ALERT_QUESTS_NEW_QUESTS", {
         source,

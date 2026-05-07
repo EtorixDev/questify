@@ -6,10 +6,10 @@
 
 import { showNotification } from "@api/Notifications";
 import { Logger } from "@utils/Logger";
-import type { Quest } from "@vencord/discord-types";
 import { NavigationRouter } from "@webpack/common/utils";
 
 import { normalizeQuestName } from "./filtering";
+import type { Quest } from "./types";
 import { QUEST_PAGE } from "./ui";
 
 const LOG = new Logger("Questify");

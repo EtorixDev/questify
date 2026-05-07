@@ -4,32 +4,31 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Quest } from "@vencord/discord-types";
-import { QuestStore } from "@webpack/common";
-
 import type { QuestIncludedTypes } from "../utils/filtering";
 import { countIncludedUnclaimedQuests, getQuestStatus, QuestStatus } from "../utils/questState";
+import { type Quest, QuestStore } from "../utils/types";
+import { getQuestifySettings } from "./access";
 import { ignoredQuestIDsKey } from "./def";
 import { rerenderQuests } from "./rerender";
-import { settings } from "./store";
 
 function validateQuestBadgeCount(): void {
-    const questButtonIncludedTypes = settings.store.questButtonIncludedTypes as QuestIncludedTypes;
+    const settings = getQuestifySettings();
+    const questButtonIncludedTypes = settings.questButtonIncludedTypes as QuestIncludedTypes;
     const quests = Array.from(QuestStore.quests.values());
     const ignoredQuestIds = getIgnoredQuestIDs();
     const count = countIncludedUnclaimedQuests(quests, ignoredQuestIds, questButtonIncludedTypes);
 
-    settings.store.questButtonBadgeCount = count;
+    settings.questButtonBadgeCount = count;
 }
 
 export function getIgnoredQuestIDs(): string[] {
-    const { ignoredQuestIDs } = settings.store;
+    const { ignoredQuestIDs } = getQuestifySettings();
     const ignoredQuestIDsForKey = Array.from(ignoredQuestIDs[ignoredQuestIDsKey] ?? []);
     return ignoredQuestIDsForKey;
 }
 
 function setIgnoredQuestIDs(questIDs: string[]): void {
-    settings.store.ignoredQuestIDs[ignoredQuestIDsKey] = questIDs;
+    getQuestifySettings().ignoredQuestIDs[ignoredQuestIDsKey] = questIDs;
 }
 
 export function validateIgnoredQuests(qs?: Quest[]): void {
