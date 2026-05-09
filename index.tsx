@@ -7,7 +7,7 @@
 import "./styles.css";
 
 import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
-import { Settings } from "@api/Settings";
+import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import definePlugin, { StartAt } from "@utils/types";
 import { findComponentByCodeLazy, onceReady } from "@webpack";
@@ -19,7 +19,7 @@ import { getQuestifySettings } from "./settings/access";
 import { resetQuestsToResume, startAutoFetchingQuests, stopAutoFetchingQuests } from "./settings/fetching";
 import { validateIgnoredQuests } from "./settings/ignoredQuests";
 import { rerenderQuests, useQuestRerender } from "./settings/rerender";
-import { disposeRestartTracking, initializeRestartTracking, promptToRestartIfDirty } from "./settings/restartTracking";
+import { disposeRestartTracking, initializeRestartTracking, promptToRestartIfDirty, setRestartDirty } from "./settings/restartTracking";
 import { settings } from "./settings/store";
 import { getSettingsModalOpen, initialQuestDataFetched, setInitialQuestDataFetched, setSettingsModalOpen } from "./state";
 import { AudioPlayer } from "./utils/audio";
@@ -35,6 +35,7 @@ import { formatLowerBadge, QUEST_PAGE } from "./utils/ui";
 let isSwitchingAccount = false;
 let didAttemptAutoCompleteResume = false;
 const notifiedCompletedQuests = new Set<string>();
+export const enabledOnStartup = PlainSettings.plugins.Questify?.enabled;
 
 function setOnQuestsPage(force?: boolean): void {
     getQuestifySettings().isOnQuestsPage = force ?? (window.location.pathname === QUEST_PAGE);
@@ -412,7 +413,7 @@ export default definePlugin({
                 {
                     // Let completed/claimed expired Quests with CTAs use the CTA-aware completed branch.
                     match: /(return\()(?=\i.enabled&&\i===\i\.\i\.EXPIRED_CLAIMABLE&&\i\.\i\.has\(\i\))/,
-                    replace: "const questifyCanAutoComplete=$self.canAutoCompleteQuest(arguments[0].quest);$1!arguments[0].quest.config.ctaConfig&&questifyCanAutoComplete&&"
+                    replace: "const questifyCanAutoComplete=$self.canAutoCompleteQuest(arguments[0].quest);$1(questifyCanAutoComplete?!arguments[0].quest.config.ctaConfig:true)&&"
                 },
                 {
                     // Let completed/claimed expired Quests with CTAs use the CTA-aware completed branch.
@@ -636,6 +637,10 @@ export default definePlugin({
     renderQuestifyButton: ErrorBoundary.wrap(QuestButton, { noop: true }),
 
     start() {
+        if (!enabledOnStartup && PlainSettings.plugins.Questify?.enabled) {
+            setRestartDirty(true);
+        }
+
         initializeRestartTracking(settings);
         addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
 
