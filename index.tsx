@@ -642,7 +642,10 @@ export default definePlugin({
         }
 
         initializeRestartTracking(settings);
-        addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+
+        if (enabledOnStartup) {
+            addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+        }
 
         onceReady.then(() => {
             if (!getQuestifySettings().disableQuestsEverything) {
