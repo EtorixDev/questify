@@ -179,7 +179,7 @@ export default definePlugin({
             // Prevents the DMs Quests tab from counting as part of the
             // DM button highlight logic while the Quest button is visible.
             find: "GLOBAL_DISCOVERY),",
-            predicate: () => !getQuestifySettings().disableQuestsEverything && showQuestButton(getQuestifySettings().questButtonDisplay, 1, true),
+            predicate: () => enabledOnStartup && !getQuestifySettings().disableQuestsEverything && showQuestButton(getQuestifySettings().questButtonDisplay, 1, true),
             replacement: {
                 match: /(pathname:(\i)}.{0,400}?return )/,
                 replace: "$1$self.disguiseHomeButton($2)?false:"
