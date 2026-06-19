@@ -48,6 +48,7 @@ export const defaultResumeInterruptedQuests = false;
 export const defaultAllowChangingDangerousSettings = false; // true -> Risky
 export const defaultMakeMobileVideoQuestsDesktopCompatible = false; // true -> Risky
 export const defaultCompleteVideoQuestsQuicker = false; // true -> Risky
+export const defaultPreventVideoQuestsPausing = false; // true -> Risky
 export const defaultAutoCompleteQuestsSimultaneously = false; // true -> Risky
 export const defaultNotifyOnQuestComplete = true;
 export const defaultNotifyOnNewQuests = true;
