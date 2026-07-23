@@ -566,7 +566,7 @@ export default definePlugin({
             replacement: [
                 {
                     // Extracts the custom maxDigits prop.
-                    match: /(=>{let{count:\i,)/,
+                    match: /(\(\i\){let{count:\i,)/,
                     replace: "$1maxDigits,"
                 },
                 {
