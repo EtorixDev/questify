@@ -46,6 +46,7 @@ export const defaultDisableFriendsListPromo = true;
 export const defaultDisableMembersListPromo = true;
 export const defaultResumeInterruptedQuests = false;
 export const defaultAllowChangingDangerousSettings = false; // true -> Risky
+export const defaultAcknowledgedNotices: Record<string, true> = {};
 export const defaultMakeMobileVideoQuestsDesktopCompatible = false; // true -> Risky
 export const defaultCompleteVideoQuestsQuicker = false; // true -> Risky
 export const defaultPreventVideoQuestsPausing = false; // true -> Risky
