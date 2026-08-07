@@ -1372,6 +1372,8 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
 }
 
 export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): void {
+    stopQueueAllAutoCompleteQuests();
+
     const resumeQuestIds = options.preserveResume ? getResumeQuestIds() : undefined;
 
     suppressQueueDrain = true;

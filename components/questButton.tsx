@@ -15,7 +15,7 @@ import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMod
 import { getIgnoredQuestIDs, ignoreAllQuests, resetIgnoredQuests } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
 import { initialQuestDataFetched } from "../state";
-import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isQuestEnrollmentRateLimited, isQueueAllAutoCompleteQuestsInProgress, queueAllAutoCompleteQuests, stopAllAutoCompletes, stopQueueAllAutoCompleteQuests } from "../utils/completion";
+import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isQuestEnrollmentRateLimited, isQueueAllAutoCompleteQuestsInProgress, queueAllAutoCompleteQuests, stopAllAutoCompletes } from "../utils/completion";
 import { fetchAndAlertQuests } from "../utils/fetching";
 import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
 import { openQuestifySettingsModal } from "./settingsModal";
@@ -243,7 +243,6 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
                     id={q(`${navId}-clear-queue`)}
                     label="Clear Quest Queue"
                     action={() => {
-                        stopQueueAllAutoCompleteQuests();
                         stopAllAutoCompletes({
                             manual: true,
                             preserveResume: false,

@@ -24,7 +24,7 @@ interface OneTimeNotice {
     title: string;
     renderBody: () => JSX.Element;
     condition: () => boolean;
-    autoAcknowledgeWhenConditionFails?: boolean;
+    autoAcknowledgeCondition?: () => boolean;
     actions: readonly NoticeAction[];
 }
 
@@ -50,7 +50,7 @@ const oneTimeNotices = [
 
             return settings.enabled && settings.allowChangingDangerousSettings;
         },
-        autoAcknowledgeWhenConditionFails: true,
+        autoAcknowledgeCondition: () => !getQuestifySettings().allowChangingDangerousSettings,
         actions: [
             {
                 text: "Keep Using Dangerous Questify Settings",
@@ -112,7 +112,7 @@ export function showPendingQuestifyNotice(): void {
         }
 
         if (!notice.condition()) {
-            if (notice.autoAcknowledgeWhenConditionFails) {
+            if (notice.autoAcknowledgeCondition?.()) {
                 acknowledgeNotice(notice.id);
             }
 
