@@ -83,7 +83,7 @@ const oneTimeNotices = [
         dismissable: false,
         renderBody: () => <div className="questify-startup-notice-body">
             <p>
-                Discord has began punishing users of scripts and plugins that modify the completion of Quests. Modifying the completion of Quests is against their <a href="https://discord.com/safety/platform-manipulation-policy-explainer" target="_blank" rel="noreferrer">Terms of Service</a>.
+                Discord has begun punishing users of scripts and plugins that modify the completion of Quests. Modifying the completion of Quests is against their <a href="https://discord.com/safety/platform-manipulation-policy-explainer" target="_blank" rel="noreferrer">Terms of Service</a>.
             </p>
             <br />
             <p>
