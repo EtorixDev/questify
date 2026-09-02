@@ -245,7 +245,7 @@ export default definePlugin({
             predicate: () => !getQuestifySettings().disableQuestsEverything && getQuestifySettings().disableOrbsAndQuestsBadges,
             replacement: [
                 {
-                    match: /(,\{badges:\i)(?=,displayProfile:\i)/,
+                    match: /(,{badges:\i)(?=,overflowCount:\i,displayProfile:\i)/,
                     replace: '$1.filter(badge=>!["quest_completed","orb_profile_badge"].includes(badge.id))',
                 }
             ]
