@@ -40,6 +40,11 @@ const questProgressTaskPriority = [
     QuestTaskType.PLAY_ON_XBOX,
 ] as const satisfies readonly QuestTaskType[];
 
+interface QuestPanelCreative {
+    type: number;
+    quest?: Quest;
+}
+
 interface QuestPanelPercentCompleteOptions {
     quest?: Quest | null;
     percentCompleteText?: string;
@@ -212,7 +217,7 @@ function getMostRecentlyCompletedUnclaimedQuest(): Quest | null {
         })[0] ?? null;
 }
 
-export function getQuestPanelOverride(quest: Quest | null): Quest | null {
+export function getQuestPanelOverride(creative: QuestPanelCreative, questType: number): QuestPanelCreative | null {
     const panelState = useQuestifySettings(["disableQuestsEverything", "disableAccountPanelPromo", "disableAccountPanelQuestProgress"]);
 
     if (panelState.disableQuestsEverything) {
@@ -224,12 +229,16 @@ export function getQuestPanelOverride(quest: Quest | null): Quest | null {
     }
 
     if (panelState.disableAccountPanelQuestProgress) {
-        return quest;
+        return creative;
     }
 
     const nextQuest = getAutoCompleteShowcaseQuest() ?? getMostRecentlyCompletedUnclaimedQuest();
 
-    return nextQuest ?? (panelState.disableAccountPanelPromo ? null : quest);
+    if (nextQuest) {
+        return { ...creative, type: questType, quest: nextQuest };
+    }
+
+    return panelState.disableAccountPanelPromo ? null : creative;
 }
 
 export function shouldForceQuestPanelVisible(quest: Quest | null): boolean {
