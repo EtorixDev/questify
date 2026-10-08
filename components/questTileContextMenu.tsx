@@ -40,7 +40,7 @@ export function QuestTileContextMenu(
                     id={q("enroll-in-quest")}
                     label="Enroll in Quest"
                     action={async () => {
-                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType } })).type === "success") {
+                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType }, method: "native" })).type === "success") {
                             rerenderQuests();
                         }
                     }}
@@ -64,7 +64,7 @@ export function QuestTileContextMenu(
                     id={q("start-auto-complete")}
                     label="Start Auto-Complete"
                     action={async () => {
-                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType } })).type === "success") {
+                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType }, method: "native" })).type === "success") {
                             processQuestForAutoComplete(refreshQuest(quest), { force: true, source: "manual" });
                             rerenderQuests();
                         }

@@ -27,7 +27,7 @@ type QuestEnrollResult =
     | { type: "unknown_error"; }
     | { type: "previous_in_flight_request"; };
 
-type QuestManualEnrollResult =
+type QuestAPIEnrollResult =
     | { type: "success"; }
     | { type: "rate_limited"; retryAfter: number | null; }
     | { type: "cancelled"; }
@@ -621,7 +621,7 @@ function showQuestEnrollmentFailureToast(quest: Quest, result: Exclude<QuestEnro
     showToast(`Enrollment in ${normalizeQuestName(quest)} Quest failed${rateLimitSuffix}.`, Toasts.Type.FAILURE);
 }
 
-export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEnrollResult> {
+export async function enrollInQuestAPI(quest: Quest): Promise<QuestAPIEnrollResult> {
     quest = refreshQuest(quest);
     const userId = getCurrentUserId();
 
@@ -680,7 +680,7 @@ export async function enrollInQuestManually(quest: Quest): Promise<QuestManualEn
 
 export async function ensureQuestEnrolled(
     quest: Quest,
-    options: { analytics?: QuestButtonAnalyticsArgs; method?: "manual" | "native"; } = {},
+    options: { analytics?: QuestButtonAnalyticsArgs; method: "api" | "native"; },
 ): Promise<QuestEnrollmentResult> {
     quest = refreshQuest(quest);
     const userId = getCurrentUserId();
@@ -693,11 +693,11 @@ export async function ensureQuestEnrolled(
         return { type: "success" };
     }
 
-    let result: QuestManualEnrollResult | QuestEnrollResult;
+    let result: QuestAPIEnrollResult | QuestEnrollResult;
 
     try {
-        result = options.method === "manual"
-            ? await enrollInQuestManually(quest)
+        result = options.method === "api"
+            ? await enrollInQuestAPI(quest)
             : await enrollInQuestNative(quest.id, makeEnrollmentData(options.analytics ?? {}));
     } catch (error) {
         QL.error("QUEST_ENROLLMENT_ERROR", { questId: quest.id, error });
@@ -1337,7 +1337,7 @@ export async function queueAllAutoCompleteQuests(): Promise<number> {
                 enrollmentAttempts++;
             }
 
-            const enrollment = await ensureQuestEnrolled(refreshedQuest, { method: "manual" });
+            const enrollment = await ensureQuestEnrolled(refreshedQuest, { method: "api" });
 
             if (signal.aborted) {
                 break;
