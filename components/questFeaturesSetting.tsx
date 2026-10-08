@@ -284,7 +284,7 @@ export function QuestFeaturesSetting(): JSX.Element {
                     disabled={questFeatures.disableQuestsEverything}
                     onClick={() => updateDangerousAccess(!questFeatures.allowChangingDangerousSettings)}
                 />
-                {questFeatures.allowChangingDangerousSettings && <>
+                <div style={{ display: questFeatures.allowChangingDangerousSettings ? undefined : "none" }}>
                     <SettingsSubtleSwitch
                         disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
                         checked={questFeatures.hideNonAutoCompletableQuests}
@@ -383,7 +383,7 @@ export function QuestFeaturesSetting(): JSX.Element {
                                 + "\n\nAuto-completing Quests is the riskiest dangerous setting available. Enable it at your own risk."
                         }}
                     />
-                </>}
+                </div>
             </SettingsNotice>
         </SettingsCard>
     );
