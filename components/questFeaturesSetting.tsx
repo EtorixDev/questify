@@ -95,33 +95,6 @@ const autoCompleteQuestTypeManaOptions: ManaSelectOption[] = autoCompleteQuestTy
     disabled: !isDesktopCompatible(value),
 }));
 
-interface SettingsAllowDangerousButtonProps {
-    allowed: boolean;
-    disabled?: boolean;
-    onClick?: (e: React.MouseEvent) => void;
-}
-
-function SettingsAllowDangerousButton({
-    allowed,
-    disabled,
-    onClick,
-}: SettingsAllowDangerousButtonProps): JSX.Element {
-    return (
-        <div className={q("settings-button", "allow-dangerous-button")}>
-            <ManaButton
-                text={allowed
-                    ? "Reset and disallow changing dangerous settings..."
-                    : "Allow changing dangerous settings..."}
-                variant={allowed ? "critical-secondary" : "critical-primary"}
-                fullWidth={true}
-                disabled={disabled}
-                onClick={onClick}
-                size="sm"
-            />
-        </div>
-    );
-}
-
 export function QuestFeaturesSetting(): JSX.Element {
     const questFeatures = useQuestifySettings([
         "disableQuestsEverything",
@@ -279,11 +252,18 @@ export function QuestFeaturesSetting(): JSX.Element {
                 <SettingsParagraph>
                     Use the following toggle to access potentially dangerous settings at your own risk.
                 </SettingsParagraph>
-                <SettingsAllowDangerousButton
-                    allowed={questFeatures.allowChangingDangerousSettings}
-                    disabled={questFeatures.disableQuestsEverything}
-                    onClick={() => updateDangerousAccess(!questFeatures.allowChangingDangerousSettings)}
-                />
+                <div className={q("settings-button", "allow-dangerous-button")}>
+                    <ManaButton
+                        text={questFeatures.allowChangingDangerousSettings
+                            ? "Reset and disallow changing dangerous settings..."
+                            : "Allow changing dangerous settings..."}
+                        variant={questFeatures.allowChangingDangerousSettings ? "critical-secondary" : "critical-primary"}
+                        fullWidth={true}
+                        disabled={questFeatures.disableQuestsEverything}
+                        onClick={() => updateDangerousAccess(!questFeatures.allowChangingDangerousSettings)}
+                        size="sm"
+                    />
+                </div>
                 <div style={{ display: questFeatures.allowChangingDangerousSettings ? undefined : "none" }}>
                     <SettingsSubtleSwitch
                         disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}

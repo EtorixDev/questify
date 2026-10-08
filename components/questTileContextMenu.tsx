@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 
 import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
-import { canAutoCompleteQuest, ensureQuestEnrolled, getQuestAutoCompleteEntry, processQuestForAutoComplete, stopQuestAutoComplete } from "../utils/completion";
+import { canAutoCompleteQuest, enrollAndStartQuestAutoComplete, ensureQuestEnrolled, getQuestAutoCompleteEntry, stopQuestAutoComplete } from "../utils/completion";
 import { getQuestStatus, QuestStatus, refreshQuest } from "../utils/questState";
 import type { Quest } from "../utils/types";
 import { q } from "../utils/ui";
@@ -64,8 +64,7 @@ export function QuestTileContextMenu(
                     id={q("start-auto-complete")}
                     label="Start Auto-Complete"
                     action={async () => {
-                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType }, method: "native" })).type === "success") {
-                            processQuestForAutoComplete(refreshQuest(quest), { force: true, source: "manual" });
+                        if (await enrollAndStartQuestAutoComplete(quest, { taskType })) {
                             rerenderQuests();
                         }
                     }}

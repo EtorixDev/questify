@@ -195,6 +195,7 @@ interface VideoProgressReportOptions {
 
 const activeAutoCompletes = new Map<string, AutoCompleteEntry>();
 const manuallyStoppedQuestIds = new Set<string>();
+let autoCompleteStartGeneration = 0;
 let enrollmentRateLimitBlockedUntil = 0;
 let queueAllAutoCompleteQuestsAbortController: AbortController | null = null;
 let suppressQueueDrain = false;
@@ -514,8 +515,7 @@ export function getQuestButtonProps(args: QuestButtonPropsArgs): QuestButtonPatc
             if (completionState === QuestCompletionState.Unenrolled) {
                 args.preClickCallback?.();
 
-                if ((await ensureQuestEnrolled(args.quest, { analytics: args, method: "native" })).type === "success") {
-                    processQuestForAutoComplete(refreshQuest(args.quest), { force: true, source: "manual" });
+                if (await enrollAndStartQuestAutoComplete(args.quest, args)) {
                     rerenderQuests();
                 }
             } else if (completionState === QuestCompletionState.Completing) {
@@ -725,6 +725,17 @@ export async function ensureQuestEnrolled(
     showQuestEnrollmentFailureToast(quest, failure);
 
     return failure;
+}
+
+export async function enrollAndStartQuestAutoComplete(quest: Quest, analytics: QuestButtonAnalyticsArgs): Promise<boolean> {
+    const generation = autoCompleteStartGeneration;
+    const enrollment = await ensureQuestEnrolled(quest, { analytics, method: "native" });
+
+    if (enrollment.type !== "success" || generation !== autoCompleteStartGeneration) {
+        return false;
+    }
+
+    return processQuestForAutoComplete(refreshQuest(quest), { force: true, source: "manual" });
 }
 
 function getQuestExpiryTime(quest: Quest): number {
@@ -1414,6 +1425,7 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
 }
 
 export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): void {
+    autoCompleteStartGeneration++;
     stopQueueAllAutoCompleteQuests();
 
     const resumeQuestIds = options.preserveResume ? getResumeQuestIds() : undefined;
