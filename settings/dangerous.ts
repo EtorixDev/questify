@@ -6,6 +6,7 @@
 
 import { getQuestifySettings } from "./access";
 import { defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultCompleteVideoQuestsQuicker, defaultHideNonAutoCompletableQuests, defaultMakeMobileVideoQuestsDesktopCompatible, defaultPreventVideoQuestsPausing, defaultResumeInterruptedQuests } from "./def";
+import { validateIgnoredQuests } from "./ignoredQuests";
 
 export function resetDangerousSettings(): void {
     const settings = getQuestifySettings();
@@ -18,4 +19,6 @@ export function resetDangerousSettings(): void {
     settings.preventVideoQuestsPausing = defaultPreventVideoQuestsPausing;
     settings.resumeInterruptedQuests = defaultResumeInterruptedQuests;
     settings.autoCompleteQuestTypes = { ...defaultAutoCompleteQuestTypes };
+
+    validateIgnoredQuests();
 }

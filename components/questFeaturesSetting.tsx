@@ -9,7 +9,7 @@ import type { JSX } from "react";
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { resetDangerousSettings } from "../settings/dangerous";
 import { autoCompleteQuestTaskTypes, defaultAutoCompleteQuestTypes, isDesktopCompatible } from "../settings/def";
-import { rerenderQuests } from "../settings/rerender";
+import { validateIgnoredQuests } from "../settings/ignoredQuests";
 import { QuestTaskType } from "../utils/types";
 import { Alerts, q } from "../utils/ui";
 import { ManaButton, type ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsNotice, SettingsParagraph, SettingsSelect, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
@@ -181,7 +181,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         }
 
         getQuestifySettings().autoCompleteQuestTypes = nextAutoCompleteQuestTypes;
-        rerenderQuests();
+        validateIgnoredQuests();
     }
 
     function updateDisableEverything(checked: boolean) {
@@ -221,8 +221,8 @@ export function QuestFeaturesSetting(): JSX.Element {
     function updateModifyValue(key: QuestModifySettingKey, checked: boolean) {
         getQuestifySettings()[key] = checked;
 
-        if (key === "hideNonAutoCompletableQuests") {
-            rerenderQuests();
+        if (key === "hideNonAutoCompletableQuests" || key === "makeMobileVideoQuestsDesktopCompatible") {
+            validateIgnoredQuests();
         }
     }
 
@@ -294,7 +294,7 @@ export function QuestFeaturesSetting(): JSX.Element {
                         bottomSpacing="5"
                         tooltip={{
                             position: "top",
-                            text: "Hide incomplete Quests without an auto-complete task that is supported on this platform and enabled in the Quest types dropdown. If no Quest types are enabled, all incomplete Quests are hidden."
+                            text: "Hide incomplete Quests with an unclaimed or ignored status when no auto-complete task is supported on this platform and enabled in the Quest types dropdown. Claimed, expired, and completed Quests are exempt. Use the Status Order Hidden options to hide those Quests."
                         }}
                     />
                     <SettingsSubtleSwitch

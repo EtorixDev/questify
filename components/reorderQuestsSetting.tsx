@@ -8,6 +8,7 @@ import type { JSX } from "react";
 
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { defaultQuestOrder, type QuestOrderStatus, type QuestSubsort } from "../settings/def";
+import { validateIgnoredQuests } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
 import { type ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsRow, SettingsRowItem, SettingsSelect, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
 
@@ -108,7 +109,7 @@ export function ReorderQuestsSetting(): JSX.Element {
         if (value === "hidden") {
             hiddenStatuses.add(status);
             getQuestifySettings().hiddenQuestStatuses = Array.from(hiddenStatuses);
-            rerenderQuests();
+            validateIgnoredQuests();
             return;
         }
 
@@ -124,7 +125,7 @@ export function ReorderQuestsSetting(): JSX.Element {
         hiddenStatuses.delete(status);
         getQuestifySettings().questOrder = nextOrder;
         getQuestifySettings().hiddenQuestStatuses = Array.from(hiddenStatuses);
-        rerenderQuests();
+        validateIgnoredQuests();
     }
 
     function updateSubsort(key: "unclaimedSubsort" | "claimedSubsort" | "ignoredSubsort" | "expiredSubsort", value: string | string[] | null): void {
