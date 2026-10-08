@@ -9,6 +9,7 @@ import type { JSX } from "react";
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { resetDangerousSettings } from "../settings/dangerous";
 import { autoCompleteQuestTaskTypes, defaultAutoCompleteQuestTypes, isDesktopCompatible } from "../settings/def";
+import { rerenderQuests } from "../settings/rerender";
 import { QuestTaskType } from "../utils/types";
 import { Alerts, q } from "../utils/ui";
 import { ManaButton, type ManaSelectOption, SettingsCard, SettingsDescription, SettingsHeader, SettingsNotice, SettingsParagraph, SettingsSelect, SettingsSubheader, SettingsSubtleSwitch } from "./shared";
@@ -27,6 +28,7 @@ type QuestModifySettingKey =
     | "resumeInterruptedQuests"
     | "completeVideoQuestsQuicker"
     | "preventVideoQuestsPausing"
+    | "hideNonAutoCompletableQuests"
     | "makeMobileVideoQuestsDesktopCompatible";
 
 interface QuestDisableOption {
@@ -137,6 +139,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         "autoCompleteQuestTypes",
         "completeVideoQuestsQuicker",
         "preventVideoQuestsPausing",
+        "hideNonAutoCompletableQuests",
     ]);
 
     const selectedDisableValues = disableFeatureOptions
@@ -178,6 +181,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         }
 
         getQuestifySettings().autoCompleteQuestTypes = nextAutoCompleteQuestTypes;
+        rerenderQuests();
     }
 
     function updateDisableEverything(checked: boolean) {
@@ -216,6 +220,10 @@ export function QuestFeaturesSetting(): JSX.Element {
 
     function updateModifyValue(key: QuestModifySettingKey, checked: boolean) {
         getQuestifySettings()[key] = checked;
+
+        if (key === "hideNonAutoCompletableQuests") {
+            rerenderQuests();
+        }
     }
 
     return (
@@ -279,10 +287,21 @@ export function QuestFeaturesSetting(): JSX.Element {
                 {questFeatures.allowChangingDangerousSettings && <>
                     <SettingsSubtleSwitch
                         disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                        checked={questFeatures.hideNonAutoCompletableQuests}
+                        label="Hide Non Auto-Completable Quests:"
+                        onChange={checked => updateModifyValue("hideNonAutoCompletableQuests", checked)}
+                        topSpacing="10"
+                        bottomSpacing="5"
+                        tooltip={{
+                            position: "top",
+                            text: "Hide incomplete Quests without an auto-complete task that is supported on this platform and enabled in the Quest types dropdown. If no Quest types are enabled, all incomplete Quests are hidden."
+                        }}
+                    />
+                    <SettingsSubtleSwitch
+                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
                         checked={questFeatures.completeVideoQuestsQuicker}
                         label="Accelerate Video Quest auto-completion:"
                         onChange={checked => updateModifyValue("completeVideoQuestsQuicker", checked)}
-                        topSpacing="10"
                         bottomSpacing="5"
                         tooltip={{
                             position: "top",

@@ -7,6 +7,7 @@
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { defaultClaimedSubsort, defaultExpiredSubsort, defaultIgnoredSubsort, defaultQuestOrder, defaultUnclaimedSubsort, type QuestOrderStatus, type QuestSubsort, type QuestTileColorSetting, type QuestTileGradient } from "../settings/def";
 import { getIgnoredQuestIDs } from "../settings/ignoredQuests";
+import { hasEnabledAutoCompleteQuestTask } from "./completion";
 import { getQuestStatus, QuestStatus } from "./questState";
 import { Quest, QuestTaskType, QuestTaskWatchVideo, QuestTaskWatchVideoOnMobile } from "./types";
 import { adjustRGB, decimalToRGB, isDarkish, q, type RGB } from "./ui";
@@ -196,7 +197,7 @@ function getValidQuestOrder(value: unknown): QuestOrderStatus[] {
     const configuredOrder = Array.isArray(value)
         ? value
         : defaultQuestOrder;
-    const order = configuredOrder.filter((status): status is QuestOrderStatus => validStatuses.has(status as QuestOrderStatus));
+    const order = Array.from(new Set(configuredOrder.filter((status): status is QuestOrderStatus => validStatuses.has(status as QuestOrderStatus))));
 
     for (const status of defaultQuestOrder) {
         if (!order.includes(status)) {
@@ -247,6 +248,8 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
         "makeMobileVideoQuestsDesktopCompatible",
         "completeVideoQuestsQuicker",
         "questOrder",
+        "hiddenQuestStatuses",
+        "hideNonAutoCompletableQuests",
         "unclaimedSubsort",
         "claimedSubsort",
         "ignoredSubsort",
@@ -262,11 +265,18 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
         injectDesktopVideoQuestTasks(quests);
     }
 
+    const ignoredQuestIds = getIgnoredQuestIDs();
+    const hiddenStatuses = new Set<string>(questSorting.hiddenQuestStatuses);
+
+    if (hiddenStatuses.size > 0 || questSorting.hideNonAutoCompletableQuests) {
+        quests = quests.filter(quest => !hiddenStatuses.has(getQuestStatus(quest, ignoredQuestIds))
+            && (!questSorting.hideNonAutoCompletableQuests || !!quest.userStatus?.completedAt || hasEnabledAutoCompleteQuestTask(quest)));
+    }
+
     if (skip) {
         return quests;
     }
 
-    const ignoredQuestIds = getIgnoredQuestIDs();
     const questGroups: Record<QuestGroupKey, Quest[]> = {
         claimed: [],
         expired: [],

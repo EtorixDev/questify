@@ -5,7 +5,7 @@
  */
 
 import { getQuestifySettings } from "./access";
-import { defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultCompleteVideoQuestsQuicker, defaultMakeMobileVideoQuestsDesktopCompatible, defaultPreventVideoQuestsPausing, defaultResumeInterruptedQuests } from "./def";
+import { defaultAllowChangingDangerousSettings, defaultAutoCompleteQuestsSimultaneously, defaultAutoCompleteQuestTypes, defaultCompleteVideoQuestsQuicker, defaultHideNonAutoCompletableQuests, defaultMakeMobileVideoQuestsDesktopCompatible, defaultPreventVideoQuestsPausing, defaultResumeInterruptedQuests } from "./def";
 
 export function resetDangerousSettings(): void {
     const settings = getQuestifySettings();
@@ -13,6 +13,7 @@ export function resetDangerousSettings(): void {
     settings.allowChangingDangerousSettings = defaultAllowChangingDangerousSettings;
     settings.autoCompleteQuestsSimultaneously = defaultAutoCompleteQuestsSimultaneously;
     settings.completeVideoQuestsQuicker = defaultCompleteVideoQuestsQuicker;
+    settings.hideNonAutoCompletableQuests = defaultHideNonAutoCompletableQuests;
     settings.makeMobileVideoQuestsDesktopCompatible = defaultMakeMobileVideoQuestsDesktopCompatible;
     settings.preventVideoQuestsPausing = defaultPreventVideoQuestsPausing;
     settings.resumeInterruptedQuests = defaultResumeInterruptedQuests;
