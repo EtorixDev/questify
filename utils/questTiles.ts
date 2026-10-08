@@ -265,6 +265,7 @@ export function sortQuests(quests: Quest[], skip?: boolean): Quest[] {
     }
 
     const ignoredQuestIds = getIgnoredQuestIDs();
+
     if (questSorting.hiddenQuestStatuses.length > 0 || questSorting.hideNonAutoCompletableQuests) {
         quests = quests.filter(quest => !isQuestHidden(quest, ignoredQuestIds));
     }
