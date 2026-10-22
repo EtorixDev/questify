@@ -327,6 +327,15 @@ export default definePlugin({
             ]
         },
         {
+            // Exposes native enrollment errors for rate limits and conservative batch handling.
+            find: 'type:"QUESTS_ENROLL_BEGIN",',
+            predicate: () => !getQuestifySettings().disableQuestsEverything,
+            replacement: {
+                match: /catch\{(return \i\.\i\.dispatch\(\{type:"QUESTS_ENROLL_FAILURE",questId:\i\}\),\{type:"unknown_error")/,
+                replace: "catch(error){$1,error"
+            }
+        },
+        {
             // Removes stack traces from Quest auto-complete network actions and marks both patches as healthy.
             find: "NetworkActionNames.QUEST_VIDEO_PROGRESS,",
             group: true,

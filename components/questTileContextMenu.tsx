@@ -31,7 +31,6 @@ export function QuestTileContextMenu(
     const isAutoCompleting = getQuestAutoCompleteEntry(quest) != null;
     const canStartAutoComplete = !isClaimedMenu && canAutoCompleteQuest(quest);
     const canEnroll = !isClaimedMenu && !isEnrolled && !quest.userStatus?.completedAt && getQuestStatus(quest, []) === QuestStatus.Unclaimed;
-    const taskType = Object.values(quest.config.taskConfigV2?.tasks ?? {})[0]?.type;
 
     children.unshift((
         <Menu.MenuGroup>
@@ -40,7 +39,7 @@ export function QuestTileContextMenu(
                     id={q("enroll-in-quest")}
                     label="Enroll in Quest"
                     action={async () => {
-                        if ((await ensureQuestEnrolled(quest, { analytics: { taskType }, method: "native" })).type === "success") {
+                        if ((await ensureQuestEnrolled(quest)).type === "success") {
                             rerenderQuests();
                         }
                     }}
@@ -64,7 +63,7 @@ export function QuestTileContextMenu(
                     id={q("start-auto-complete")}
                     label="Start Auto-Complete"
                     action={async () => {
-                        if (await enrollAndStartQuestAutoComplete(quest, { taskType })) {
+                        if (await enrollAndStartQuestAutoComplete(quest)) {
                             rerenderQuests();
                         }
                     }}
