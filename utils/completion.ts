@@ -23,6 +23,7 @@ import { type Quest, QuestStore, QuestTargetedContent, QuestTaskType } from "./t
 
 type QuestEnrollResult =
     | { type: "success"; }
+    | { type: "cancelled"; }
     | { type: "unknown_error"; error?: unknown; }
     | { type: "previous_in_flight_request"; };
 
@@ -234,7 +235,7 @@ interface VideoProgressReportOptions {
 }
 
 const activeAutoCompletes = new Map<string, AutoCompleteEntry>();
-const manuallyStoppedQuestIds = new Set<string>();
+const manuallyStoppedQuests = new Set<string>();
 let autoCompleteStartGeneration = 0;
 let questProcessingTail: Promise<void> = Promise.resolve();
 let nextQuestProcessingBatchId = 0;
@@ -741,7 +742,7 @@ export async function ensureQuestEnrolled(quest: Quest, analytics: QuestButtonAn
 
     await new Promise<void>(resolve => FluxDispatcher.wait(resolve));
 
-    if (getCurrentUserId() !== userId) {
+    if (result.type === "cancelled" || getCurrentUserId() !== userId) {
         return { type: "cancelled" };
     }
 
@@ -1299,9 +1300,11 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
         return true;
     }
 
+    const manualStopKey = `${getCurrentUserId()}:${quest.id}`;
+
     if (force) {
-        manuallyStoppedQuestIds.delete(quest.id);
-    } else if (manuallyStoppedQuestIds.has(quest.id)) {
+        manuallyStoppedQuests.delete(manualStopKey);
+    } else if (manuallyStoppedQuests.has(manualStopKey)) {
         QL.warn("AUTO_COMPLETE_MANUALLY_STOPPED", { questId: quest.id, questName });
         return false;
     }
@@ -1378,7 +1381,7 @@ function getQuestProcessingAction(quest: Quest, { autoComplete, source = "manual
     const complete = autoComplete
         && (source === "manual" || settings.autoCompleteQuests)
         && !activeAutoCompletes.has(quest.id)
-        && (source === "manual" || !manuallyStoppedQuestIds.has(quest.id))
+        && (source === "manual" || !manuallyStoppedQuests.has(`${getCurrentUserId()}:${quest.id}`))
         && canAutoCompleteQuest(quest);
     const enroll = !quest.userStatus?.enrolledAt && (complete || (source === "auto" ? settings.autoEnrollQuests : !autoComplete));
 
@@ -1578,8 +1581,8 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
     const resumeQuestIds = preserveResume ? getResumeQuestIds() : undefined;
     const automaticQuestIds = preserveResume ? getAutomaticResumeQuestIds() : undefined;
 
-    if (manual) {
-        manuallyStoppedQuestIds.add(questId);
+    if (manual && userId) {
+        manuallyStoppedQuests.add(`${userId}:${questId}`);
     }
 
     if (!entry) {
@@ -1631,7 +1634,8 @@ export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): voi
             stopQuestAutoComplete(questId, { ...options, userId });
         }
 
-        if (userId) {
+        // An empty runtime queue may not have restored the saved queue yet.
+        if (userId && (!options.preserveResume || resumeQuestIds?.length || !getQuestifySettings().resumeInterruptedQuests)) {
             updateResumeState(resumeQuestIds, userId, automaticQuestIds);
         }
     } finally {
