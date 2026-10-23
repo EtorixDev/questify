@@ -1285,8 +1285,9 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
     const { force = false, source = "manual" } = options;
     const questName = normalizeQuestName(quest);
     const existingEntry = activeAutoCompletes.get(quest.id);
+    const settings = getQuestifySettings();
 
-    if (source === "auto" && getQuestifySettings().usedKonamiCode !== true) {
+    if (source === "auto" && (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings)) {
         return false;
     }
 
