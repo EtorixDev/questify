@@ -7,13 +7,13 @@
 import { SettingsStore } from "@api/Settings";
 
 import { initialQuestDataFetched } from "../state";
-import { processQuests, stopQuestProcessing } from "../utils/completion";
+import { processQuests, stopAutomaticAutoCompletes, stopQuestProcessing } from "../utils/completion";
 import { QL } from "../utils/logging";
 import { type Quest, QuestStore } from "../utils/types";
 import { getQuestifySettings } from "./access";
 import { startAutoFetchingQuests } from "./fetching";
 
-const automationSettingKeys = ["autoEnrollQuests", "autoCompleteQuests", "allowChangingDangerousSettings", "disableQuestsEverything"] as const;
+const automationSettingKeys = ["usedKonamiCode", "autoEnrollQuests", "autoCompleteQuests", "allowChangingDangerousSettings", "disableQuestsEverything"] as const;
 const automationStartDelayMs = 10000;
 let automationActive = false;
 let automationStartTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -24,6 +24,7 @@ export function processAutomaticQuests(quests: readonly Quest[]): void {
     if (
         !automationActive ||
         automationStartTimeout !== null ||
+        settings.usedKonamiCode !== true ||
         settings.disableQuestsEverything ||
         !settings.allowChangingDangerousSettings ||
         (!settings.autoEnrollQuests && !settings.autoCompleteQuests)
@@ -51,8 +52,13 @@ function onAutomationSettingsChanged(): void {
 
     const settings = getQuestifySettings();
 
+    if (settings.usedKonamiCode !== true) {
+        stopAutomaticAutoCompletes();
+    }
+
     if (
         !automationActive ||
+        settings.usedKonamiCode !== true ||
         settings.disableQuestsEverything ||
         !settings.allowChangingDangerousSettings ||
         (!settings.autoEnrollQuests && !settings.autoCompleteQuests)

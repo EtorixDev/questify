@@ -131,4 +131,4 @@ export const defaultLastQuestPageFilters = {} as Record<string, { group: string,
 export const ignoredQuestIDsKey = "questIDs";
 export const defaultIgnoredQuestIDs = { [ignoredQuestIDsKey]: [] } as Record<typeof ignoredQuestIDsKey, string[]>;
 export const defaultResumeQuestIDs = {} as Record<string, // key: UserID
-    { timestamp: number, questIDs: string[]; }>;
+    { timestamp: number, questIDs: string[]; automaticQuestIDs?: string[]; }>;

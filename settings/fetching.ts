@@ -34,7 +34,7 @@ export function autoFetchCompatible(): boolean {
         buttonCompatible = true;
     }
 
-    const automationCompatible = settings.allowChangingDangerousSettings && (settings.autoEnrollQuests || settings.autoCompleteQuests);
+    const automationCompatible = settings.usedKonamiCode === true && settings.allowChangingDangerousSettings && (settings.autoEnrollQuests || settings.autoCompleteQuests);
     const compatible = fetching && (buttonCompatible || notificationsCompatible || automationCompatible);
 
     return compatible;
@@ -93,5 +93,6 @@ export function resetQuestsToResume(quest?: Quest, userId?: string): void {
     resumeQuestIDs[key] = {
         timestamp: resumeState.timestamp,
         questIDs: resumeState.questIDs.filter(id => id !== quest.id),
+        automaticQuestIDs: resumeState.automaticQuestIDs?.filter(id => id !== quest.id),
     };
 }

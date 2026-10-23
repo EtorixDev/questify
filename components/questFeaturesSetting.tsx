@@ -110,6 +110,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         "resumeInterruptedQuests",
         "allowChangingDangerousSettings",
         "makeMobileVideoQuestsDesktopCompatible",
+        "usedKonamiCode",
         "autoEnrollQuests",
         "autoCompleteQuests",
         "autoCompleteQuestsSimultaneously",
@@ -344,30 +345,34 @@ export function QuestFeaturesSetting(): JSX.Element {
                             text: "This setting will automatically resume any interrupted auto-completions caused by reloads or restarts, including requeuing Quests which had yet to start auto-completing but had been queued."
                         }}
                     />
-                    <SettingsSubtleSwitch
-                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
-                        checked={questFeatures.autoCompleteQuests}
-                        label="Automatically process compatible Quests for auto-completion:"
-                        onChange={checked => updateModifyValue("autoCompleteQuests", checked)}
-                        bottomSpacing="5"
-                        tooltip={{
-                            position: "top",
-                            text: "Complete eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running. Only supported task types enabled below are included."
-                                + "\n\nAutomatically enrolls in compatible Quests before queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
-                        }}
-                    />
-                    <SettingsSubtleSwitch
-                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
-                        checked={questFeatures.autoEnrollQuests}
-                        label="Automatically enroll in compatible Quests."
-                        onChange={checked => updateModifyValue("autoEnrollQuests", checked)}
-                        bottomSpacing="5"
-                        tooltip={{
-                            position: "top",
-                            text: "Enroll in eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running."
-                                + "\n\nEnrolls in Quests without queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
-                        }}
-                    />
+                    {questFeatures.usedKonamiCode === true && (
+                        <>
+                            <SettingsSubtleSwitch
+                                disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                                checked={questFeatures.autoCompleteQuests}
+                                label="Automatically process compatible Quests for auto-completion:"
+                                onChange={checked => updateModifyValue("autoCompleteQuests", checked)}
+                                bottomSpacing="5"
+                                tooltip={{
+                                    position: "top",
+                                    text: "Complete eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running. Only supported task types enabled below are included."
+                                        + "\n\nAutomatically enrolls in compatible Quests before queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
+                                }}
+                            />
+                            <SettingsSubtleSwitch
+                                disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                                checked={questFeatures.autoEnrollQuests}
+                                label="Automatically enroll in compatible Quests."
+                                onChange={checked => updateModifyValue("autoEnrollQuests", checked)}
+                                bottomSpacing="5"
+                                tooltip={{
+                                    position: "top",
+                                    text: "Enroll in eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running."
+                                        + "\n\nEnrolls in Quests without queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
+                                }}
+                            />
+                        </>
+                    )}
                     <SettingsSelect
                         label="Auto-complete specific Quest types:"
                         wrapTags={true}

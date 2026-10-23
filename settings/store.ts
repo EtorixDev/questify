@@ -422,5 +422,6 @@ export const settings = definePluginSettings({
         hidden: true,
     },
 }).withPrivateSettings<{
+    usedKonamiCode?: boolean;
     enrollmentRateLimitBlockedUntil?: Record<string, number>;
 }>();

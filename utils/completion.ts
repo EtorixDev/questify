@@ -180,6 +180,7 @@ export interface AutoCompleteEntry {
     questName: string;
     task: QuestTask;
     kind: AutoCompleteQuestKind;
+    source: AutoCompleteStartSource;
     status: AutoCompleteQuestStatus;
     progress: number | null;
     abortController: AbortController;
@@ -396,11 +397,15 @@ function getResumeQuestIds(): string[] {
     return Array.from(activeAutoCompletes.keys());
 }
 
+function getAutomaticResumeQuestIds(): string[] {
+    return Array.from(activeAutoCompletes.values()).filter(entry => entry.source === "auto").map(entry => entry.questId);
+}
+
 function isResumeStateExpired(timestamp: number): boolean {
     return Date.now() - timestamp > resumeExpiryMs;
 }
 
-function updateResumeState(questIDs: string[] = getResumeQuestIds(), userId: string | null = getCurrentUserId()): void {
+function updateResumeState(questIDs: string[] = getResumeQuestIds(), userId: string | null = getCurrentUserId(), automaticQuestIDs: string[] = getAutomaticResumeQuestIds()): void {
     if (!userId) {
         QL.warn("AUTO_COMPLETE_RESUME_NO_USER");
         return;
@@ -414,6 +419,7 @@ function updateResumeState(questIDs: string[] = getResumeQuestIds(), userId: str
     getQuestifySettings().resumeQuestIDs[userId] = {
         timestamp: Date.now(),
         questIDs,
+        automaticQuestIDs,
     };
 }
 
@@ -421,12 +427,14 @@ function createAutoCompleteEntry(
     quest: Quest,
     task: QuestTask,
     kind: AutoCompleteQuestKind,
+    source: AutoCompleteStartSource,
 ): AutoCompleteEntry {
     return {
         questId: quest.id,
         questName: normalizeQuestName(quest),
         task,
         kind,
+        source,
         status: "queued",
         progress: getQuestStoredProgress(quest, task),
         abortController: new AbortController(),
@@ -1157,7 +1165,10 @@ async function runAchievementQuest(quest: Quest, entry: AutoCompleteEntry, targe
         return false;
     }
 
-    const result = await QuestifyNative.complete(appId, authCode, target.adjusted, quest.id, await getActivityReferrer(appId));
+    const activityReferrer = isEntryActive(entry) ? await getActivityReferrer(appId) : undefined;
+    const result = isEntryActive(entry)
+        ? await QuestifyNative.complete(appId, authCode, target.adjusted, quest.id, activityReferrer)
+        : { success: false, error: null };
     await RestAPI.get({ url: "/oauth2/tokens" });
     const success = result.success === true;
 
@@ -1176,7 +1187,7 @@ async function runAchievementQuest(quest: Quest, entry: AutoCompleteEntry, targe
         QL.error("AUTO_COMPLETE_ACHIEVEMENT_DEAUTH_FAILED", { questId: quest.id, questName: entry.questName, error });
     }
 
-    if (!success) {
+    if (!success && isEntryActive(entry)) {
         QL.error("AUTO_COMPLETE_ACHIEVEMENT_FAILED", { questId: quest.id, questName: entry.questName, error: result.error });
     }
 
@@ -1275,6 +1286,10 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
     const questName = normalizeQuestName(quest);
     const existingEntry = activeAutoCompletes.get(quest.id);
 
+    if (source === "auto" && getQuestifySettings().usedKonamiCode !== true) {
+        return false;
+    }
+
     if (!isAutoCompleteRuntimeReady(true)) {
         return false;
     }
@@ -1302,7 +1317,7 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
         return false;
     }
 
-    const entry = createAutoCompleteEntry(quest, resolvedQuest.task, resolvedQuest.kind);
+    const entry = createAutoCompleteEntry(quest, resolvedQuest.task, resolvedQuest.kind, source);
 
     activeAutoCompletes.set(quest.id, entry);
 
@@ -1355,7 +1370,7 @@ function getQuestProcessingAction(quest: Quest, { autoComplete, source = "manual
         return { enroll: false, complete: false };
     }
 
-    if (source === "auto" && (!settings.allowChangingDangerousSettings || isQuestHidden(quest, ignoredQuestIds))) {
+    if (source === "auto" && (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings || isQuestHidden(quest, ignoredQuestIds))) {
         return { enroll: false, complete: false };
     }
 
@@ -1560,6 +1575,7 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
     const questId = typeof questOrId === "string" ? questOrId : questOrId.id;
     const entry = activeAutoCompletes.get(questId);
     const resumeQuestIds = preserveResume ? getResumeQuestIds() : undefined;
+    const automaticQuestIds = preserveResume ? getAutomaticResumeQuestIds() : undefined;
 
     if (manual) {
         manuallyStoppedQuestIds.add(questId);
@@ -1567,7 +1583,7 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
 
     if (!entry) {
         if (userId) {
-            updateResumeState(resumeQuestIds, userId);
+            updateResumeState(resumeQuestIds, userId, automaticQuestIds);
         }
 
         return false;
@@ -1588,7 +1604,7 @@ export function stopQuestAutoComplete(questOrId: Quest | string, options: AutoCo
             resetQuestsToResume(quest, userId);
         }
 
-        updateResumeState(resumeQuestIds, userId);
+        updateResumeState(resumeQuestIds, userId, automaticQuestIds);
     }
 
     if (!getQuestifySettings().autoCompleteQuestsSimultaneously && !suppressQueueDrain) {
@@ -1604,6 +1620,7 @@ export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): voi
     stopQuestProcessing();
 
     const resumeQuestIds = options.preserveResume ? getResumeQuestIds() : undefined;
+    const automaticQuestIds = options.preserveResume ? getAutomaticResumeQuestIds() : undefined;
     const userId = options.userId === undefined ? getCurrentUserId() : options.userId;
 
     suppressQueueDrain = true;
@@ -1614,11 +1631,27 @@ export function stopAllAutoCompletes(options: AutoCompleteStopOptions = {}): voi
         }
 
         if (userId) {
-            updateResumeState(resumeQuestIds, userId);
+            updateResumeState(resumeQuestIds, userId, automaticQuestIds);
         }
     } finally {
         suppressQueueDrain = false;
     }
+}
+
+export function stopAutomaticAutoCompletes(): void {
+    suppressQueueDrain = true;
+
+    try {
+        for (const entry of Array.from(activeAutoCompletes.values())) {
+            if (entry.source === "auto") {
+                stopQuestAutoComplete(entry.questId, { manual: false });
+            }
+        }
+    } finally {
+        suppressQueueDrain = false;
+    }
+
+    runNextQueuedQuest();
 }
 
 export function stopAutoCompletesForRunningGames(gameIds: string[]): boolean {
@@ -1677,7 +1710,9 @@ export function resumeInterruptedAutoCompletes(): void {
     const resumedQuestIds = new Set<string>();
 
     for (const quest of resumableQuests) {
-        if (processQuestForAutoComplete(quest, { force: true, source: "resume" })) {
+        const source = resumeState.automaticQuestIDs?.includes(quest.id) ? "auto" : "resume";
+
+        if (processQuestForAutoComplete(quest, { force: true, source })) {
             resumedQuestIds.add(quest.id);
         }
     }
