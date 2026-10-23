@@ -24,6 +24,8 @@ type QuestDisableSettingKey =
     | "disableSponsoredBanner";
 
 type QuestModifySettingKey =
+    | "autoEnrollQuests"
+    | "autoCompleteQuests"
     | "autoCompleteQuestsSimultaneously"
     | "resumeInterruptedQuests"
     | "completeVideoQuestsQuicker"
@@ -108,6 +110,8 @@ export function QuestFeaturesSetting(): JSX.Element {
         "resumeInterruptedQuests",
         "allowChangingDangerousSettings",
         "makeMobileVideoQuestsDesktopCompatible",
+        "autoEnrollQuests",
+        "autoCompleteQuests",
         "autoCompleteQuestsSimultaneously",
         "autoCompleteQuestTypes",
         "completeVideoQuestsQuicker",
@@ -340,9 +344,32 @@ export function QuestFeaturesSetting(): JSX.Element {
                             text: "This setting will automatically resume any interrupted auto-completions caused by reloads or restarts, including requeuing Quests which had yet to start auto-completing but had been queued."
                         }}
                     />
+                    <SettingsSubtleSwitch
+                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                        checked={questFeatures.autoCompleteQuests}
+                        label="Automatically process compatible Quests for auto-completion:"
+                        onChange={checked => updateModifyValue("autoCompleteQuests", checked)}
+                        bottomSpacing="5"
+                        tooltip={{
+                            position: "top",
+                            text: "Complete eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running. Only supported task types enabled below are included."
+                                + "\n\nAutomatically enrolls in compatible Quests before queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
+                        }}
+                    />
+                    <SettingsSubtleSwitch
+                        disabled={questFeatures.disableQuestsEverything || !questFeatures.allowChangingDangerousSettings}
+                        checked={questFeatures.autoEnrollQuests}
+                        label="Automatically enroll in compatible Quests."
+                        onChange={checked => updateModifyValue("autoEnrollQuests", checked)}
+                        bottomSpacing="5"
+                        tooltip={{
+                            position: "top",
+                            text: "Enroll in eligible, unclaimed, unignored, and unexpired Quests included by your reward and Quest type filters that are detected while Discord is running."
+                                + "\n\nEnrolls in Quests without queuing them for auto-completion. Waits for known rate-limit cooldowns. Stops on unknown errors, rate limits without a retry delay, or repeated enrollment failures."
+                        }}
+                    />
                     <SettingsSelect
                         label="Auto-complete specific Quest types:"
-                        labelClassName="margin-top-9"
                         wrapTags={true}
                         options={autoCompleteQuestTypeManaOptions}
                         value={selectedAutoCompleteQuestTypeValues}
@@ -359,7 +386,7 @@ export function QuestFeaturesSetting(): JSX.Element {
                                 + "\n\nPlay on Desktop, Play on PlayStation, Play on Xbox, and Play Activity Quests are only available on official desktop clients due to a limitation imposed by Discord. 3rd party clients such as web extensions, Vesktop, Equibop, and others, do not support auto-completing these Quest types."
                                 + "\n\nAll game related Quests usually send a game fingerprint with the heartbeat reports. This means Discord can use data from tens of thousands of users to determine whether other users are likely using a real game or are emulating the executable. There is no reasonable method to spoof this value, so Questify leaves it blank, but the absence of it will be just as telling as poorly spoofing the value."
                                 + "\n\nAchievement in Activity Quests can only be auto-completed by completing them immediately. This method may be patched at any time."
-                                + "\n\nAuto-completing Quests is done by clicking their respective buttons on the Quests page. Quests will be auto-completed in the order they were queued, unless the simultaneous completion setting is enabled above."
+                                + "\n\nAuto-completion starts from Quest buttons on the Quests page or automatic processing. Quests are completed in the order they were queued, unless simultaneous completion is enabled above."
                                 + "\n\nAuto-completing Quests is the riskiest dangerous setting available. Enable it at your own risk."
                         }}
                     />

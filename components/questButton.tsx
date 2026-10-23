@@ -15,8 +15,9 @@ import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMod
 import { getIgnoredQuestIDs, ignoreAllQuests, resetIgnoredQuests } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
 import { initialQuestDataFetched } from "../state";
-import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isQuestEnrollmentRateLimited, isQueueAllAutoCompleteQuestsInProgress, queueAllAutoCompleteQuests, stopAllAutoCompletes } from "../utils/completion";
+import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isProcessingQuests, isQuestEnrollmentRateLimited, processQuests, stopAllAutoCompletes } from "../utils/completion";
 import { fetchAndAlertQuests } from "../utils/fetching";
+import { QL } from "../utils/logging";
 import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
 import { openQuestifySettingsModal } from "./settingsModal";
 
@@ -198,7 +199,7 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
     const noneAutoCompletable = getQueueableAutoCompleteQuests().length <= 0;
     const queueAllQuestsVisible = !settings.autoCompleteQuestsSimultaneously && !noneAutoCompletable;
     const enrollmentRateLimited = isQuestEnrollmentRateLimited();
-    const queueAllQuestsInProgress = isQueueAllAutoCompleteQuestsInProgress();
+    const queueAllQuestsInProgress = isProcessingQuests();
     const queueAllQuestsDisabled = dummy || queueAllQuestsInProgress || enrollmentRateLimited;
     const labelSuffix = (dummy ? "" : queueAllQuestsInProgress ? " (In-Progress)" : enrollmentRateLimited ? " (Rate-Limited)" : "");
     const clearQueueVisible = queueAllQuestsInProgress || getActiveAutoCompletes().length > 0;
@@ -227,11 +228,13 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
                     id={q(`${navId}-queue-all-quests`)}
                     label={"Queue All Quests" + labelSuffix}
                     action={() => {
-                        const queueAllPromise = queueAllAutoCompleteQuests();
+                        const queueAllPromise = processQuests(getQueueableAutoCompleteQuests(), { autoComplete: true });
 
                         rerenderQuests();
 
-                        void queueAllPromise.finally(() => {
+                        void queueAllPromise.catch(error => {
+                            QL.error("QUEST_PROCESSING_FAILED", { error });
+                        }).finally(() => {
                             rerenderQuests();
                         });
                     }}
