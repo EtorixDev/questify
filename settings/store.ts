@@ -423,5 +423,7 @@ export const settings = definePluginSettings({
     },
 }).withPrivateSettings<{
     usedKonamiCode?: boolean;
+    autoEnrollQuestsUnpaused?: boolean;
+    autoCompleteQuestsUnpaused?: boolean;
     enrollmentRateLimitBlockedUntil?: Record<string, number>;
 }>();

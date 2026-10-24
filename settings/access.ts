@@ -11,6 +11,8 @@ export const QUESTIFY_PLUGIN_NAME = "Questify";
 
 interface QuestifySettingsOverrides {
     usedKonamiCode?: boolean;
+    autoEnrollQuestsUnpaused?: boolean;
+    autoCompleteQuestsUnpaused?: boolean;
     enrollmentRateLimitBlockedUntil?: Record<string, number>;
     ignoredQuestIDs: Record<string, string[]>;
     resumeQuestIDs: Record<string, { timestamp: number, questIDs: string[]; automaticQuestIDs?: string[]; }>;

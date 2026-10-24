@@ -13,13 +13,15 @@ import { type Quest, QuestStore } from "../utils/types";
 import { getQuestifySettings } from "./access";
 import { startAutoFetchingQuests } from "./fetching";
 
-const automationSettingKeys = ["usedKonamiCode", "autoEnrollQuests", "autoCompleteQuests", "allowChangingDangerousSettings", "disableQuestsEverything"] as const;
+const automationSettingKeys = ["usedKonamiCode", "autoEnrollQuests", "autoCompleteQuests", "autoEnrollQuestsUnpaused", "autoCompleteQuestsUnpaused", "allowChangingDangerousSettings", "disableQuestsEverything"] as const;
 const automationStartDelayMs = 10000;
 let automationActive = false;
 let automationStartTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export function processAutomaticQuests(quests: readonly Quest[]): void {
     const settings = getQuestifySettings();
+    const autoEnroll = settings.autoEnrollQuests && settings.autoEnrollQuestsUnpaused !== false;
+    const autoComplete = settings.autoCompleteQuests && settings.autoCompleteQuestsUnpaused !== false;
 
     if (
         !automationActive ||
@@ -27,12 +29,12 @@ export function processAutomaticQuests(quests: readonly Quest[]): void {
         settings.usedKonamiCode !== true ||
         settings.disableQuestsEverything ||
         !settings.allowChangingDangerousSettings ||
-        (!settings.autoEnrollQuests && !settings.autoCompleteQuests)
+        (!autoEnroll && !autoComplete)
     ) {
         return;
     }
 
-    void processQuests(quests, { autoComplete: settings.autoCompleteQuests, source: "auto" }).catch(error => {
+    void processQuests(quests, { autoComplete, source: "auto" }).catch(error => {
         QL.error("AUTOMATIC_QUEST_PROCESSING_FAILED", { error });
     });
 }
@@ -51,8 +53,10 @@ function onAutomationSettingsChanged(): void {
     startAutoFetchingQuests(true);
 
     const settings = getQuestifySettings();
+    const autoEnroll = settings.autoEnrollQuests && settings.autoEnrollQuestsUnpaused !== false;
+    const autoComplete = settings.autoCompleteQuests && settings.autoCompleteQuestsUnpaused !== false;
 
-    if (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings) {
+    if (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings || settings.autoCompleteQuestsUnpaused === false) {
         stopAutomaticAutoCompletes();
     }
 
@@ -61,7 +65,7 @@ function onAutomationSettingsChanged(): void {
         settings.usedKonamiCode !== true ||
         settings.disableQuestsEverything ||
         !settings.allowChangingDangerousSettings ||
-        (!settings.autoEnrollQuests && !settings.autoCompleteQuests)
+        (!autoEnroll && !autoComplete)
     ) {
         return;
     }
@@ -74,7 +78,7 @@ function onAutomationSettingsChanged(): void {
         }
     }, automationStartDelayMs);
 
-    QL.info("QUEST_AUTOMATION_DEBOUNCE_STARTED", { delayMs: automationStartDelayMs, autoEnroll: settings.autoEnrollQuests, autoComplete: settings.autoCompleteQuests });
+    QL.info("QUEST_AUTOMATION_DEBOUNCE_STARTED", { delayMs: automationStartDelayMs, autoEnroll, autoComplete });
 }
 
 export function initializeQuestAutomation(): void {

@@ -1312,7 +1312,7 @@ export function processQuestForAutoComplete(quest: Quest, options: AutoCompleteS
     const existingEntry = activeAutoCompletes.get(quest.id);
     const settings = getQuestifySettings();
 
-    if (source === "auto" && (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings)) {
+    if (source === "auto" && (settings.usedKonamiCode !== true || !settings.allowChangingDangerousSettings || settings.autoCompleteQuestsUnpaused === false)) {
         return false;
     }
 
@@ -1404,11 +1404,12 @@ function getQuestProcessingAction(quest: Quest, { autoComplete, source = "manual
     }
 
     const complete = autoComplete
-        && (source === "manual" || settings.autoCompleteQuests)
+        && (source === "manual" || (settings.autoCompleteQuests && settings.autoCompleteQuestsUnpaused !== false))
         && !activeAutoCompletes.has(quest.id)
         && (source === "manual" || !manuallyStoppedQuests.has(`${getCurrentUserId()}:${quest.id}`))
         && canAutoCompleteQuest(quest);
-    const enroll = !quest.userStatus?.enrolledAt && (complete || (source === "auto" ? settings.autoEnrollQuests : !autoComplete));
+    const autoEnroll = settings.autoEnrollQuests && settings.autoEnrollQuestsUnpaused !== false;
+    const enroll = !quest.userStatus?.enrolledAt && (complete || (source === "auto" ? autoEnroll : !autoComplete));
 
     return { enroll, complete };
 }

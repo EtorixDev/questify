@@ -34,7 +34,9 @@ export function autoFetchCompatible(): boolean {
         buttonCompatible = true;
     }
 
-    const automationCompatible = settings.usedKonamiCode === true && settings.allowChangingDangerousSettings && (settings.autoEnrollQuests || settings.autoCompleteQuests);
+    const autoEnroll = settings.autoEnrollQuests && settings.autoEnrollQuestsUnpaused !== false;
+    const autoComplete = settings.autoCompleteQuests && settings.autoCompleteQuestsUnpaused !== false;
+    const automationCompatible = settings.usedKonamiCode === true && settings.allowChangingDangerousSettings && (autoEnroll || autoComplete);
     const compatible = fetching && (buttonCompatible || notificationsCompatible || automationCompatible);
 
     return compatible;
