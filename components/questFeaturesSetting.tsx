@@ -8,7 +8,7 @@ import type { JSX } from "react";
 
 import { getQuestifySettings, useQuestifySettings } from "../settings/access";
 import { resetDangerousSettings } from "../settings/dangerous";
-import { autoCompleteQuestTaskTypes, defaultAutoCompleteQuestTypes, isDesktopCompatible } from "../settings/def";
+import { autoCompleteQuestTaskTypes, defaultAutoCompleteQuestTypes, isAutoCompleteCompatible } from "../settings/def";
 import { validateIgnoredQuests } from "../settings/ignoredQuests";
 import { QuestTaskType } from "../utils/types";
 import { Alerts, q } from "../utils/ui";
@@ -94,7 +94,7 @@ const autoCompleteQuestTypeManaOptions: ManaSelectOption[] = autoCompleteQuestTy
     id: String(value),
     label,
     value: String(value),
-    disabled: !isDesktopCompatible(value),
+    disabled: !isAutoCompleteCompatible(value),
 }));
 
 export function QuestFeaturesSetting(): JSX.Element {
@@ -125,7 +125,7 @@ export function QuestFeaturesSetting(): JSX.Element {
         .map(({ key }) => key);
 
     const selectedAutoCompleteQuestTypeValues = autoCompleteQuestTypeOptions
-        .filter(({ value }) => isDesktopCompatible(value) && questFeatures.autoCompleteQuestTypes[value] === true)
+        .filter(({ value }) => isAutoCompleteCompatible(value) && questFeatures.autoCompleteQuestTypes[value] === true)
         .map(({ value }) => String(value));
 
     function updateDisableValue(value: string | string[] | null) {
@@ -153,7 +153,7 @@ export function QuestFeaturesSetting(): JSX.Element {
 
         for (const { value: questType } of autoCompleteQuestTypeOptions) {
             const nextValue = selectedValues.has(String(questType))
-                && isDesktopCompatible(questType);
+                && isAutoCompleteCompatible(questType);
 
             nextAutoCompleteQuestTypes[questType] = nextValue;
         }
@@ -388,9 +388,8 @@ export function QuestFeaturesSetting(): JSX.Element {
                             wider: true,
                             text: "Watch Video on Mobile Quests will only work on mobile Quests which are enrollable on desktop. If a Quest is locked to enrollment on mobile, you must first enroll in it on your mobile device before returning to desktop and refreshing your Quests."
                                 + "\n\nAll video related Quests usually send a stack trace with the progress reports. This means Discord would know exactly which functions were called, and can therefore verify that their own functions initiated the progress. Questify erases this stack trace, but the absence of it will be just as telling as its presence."
-                                + "\n\nPlay on Desktop, Play on PlayStation, Play on Xbox, and Play Activity Quests are only available on official desktop clients due to a limitation imposed by Discord. 3rd party clients such as web extensions, Vesktop, Equibop, and others, do not support auto-completing these Quest types."
+                                + "\n\nPlay on Desktop, Play on PlayStation, Play on Xbox, Play Activity, and Achievement in Activity Quests are only available on official desktop clients due to a limitation imposed by Discord. 3rd party clients such as web extensions, Vesktop, Equibop, and others, do not support auto-completing these Quest types."
                                 + "\n\nAll game related Quests usually send a game fingerprint with the heartbeat reports. This means Discord can use data from tens of thousands of users to determine whether other users are likely using a real game or are emulating the executable. There is no reasonable method to spoof this value, so Questify leaves it blank, but the absence of it will be just as telling as poorly spoofing the value."
-                                + "\n\nAchievement in Activity Quests can only be auto-completed by completing them immediately. This method may be patched at any time."
                                 + "\n\nAuto-completion starts from Quest buttons on the Quests page or automatic processing. Quests are completed in the order they were queued, unless simultaneous completion is enabled above."
                                 + "\n\nAuto-completing Quests is the riskiest dangerous setting available. Enable it at your own risk."
                         }}

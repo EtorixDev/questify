@@ -10,7 +10,7 @@ import { findByCodeLazy, findLazy } from "@webpack";
 import { FluxDispatcher, RestAPI, showToast, UserStore } from "@webpack/common";
 
 import { getCurrentUserId, getQuestifySettings } from "../settings/access";
-import { autoCompleteQuestTaskTypes, isDesktopCompatible } from "../settings/def";
+import { autoCompleteQuestTaskTypes, isAutoCompleteCompatible, isEnrollmentCompatible } from "../settings/def";
 import { resetQuestsToResume } from "../settings/fetching";
 import { getIgnoredQuestIDs } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
@@ -19,7 +19,7 @@ import { normalizeQuestName, type QuestIncludedTypes, questMatchesIncludedTypes 
 import { QL } from "./logging";
 import { getQuestStatus, getQuestStoredProgress, isQuestHidden, isVideoQuestTask, QuestStatus, QuestTask, refreshQuest } from "./questState";
 import { hasInjectedDesktopVideoCompatibility } from "./questTiles";
-import { type Quest, QuestStore, QuestTargetedContent, QuestTaskType } from "./types";
+import { type Quest, QuestStore, QuestTargetedContent, QuestTaskJoinOperator, QuestTaskType } from "./types";
 
 type QuestEnrollResult =
     | { type: "success"; }
@@ -29,6 +29,7 @@ type QuestEnrollResult =
 
 type QuestEnrollmentResult =
     | { type: "success"; }
+    | { type: "unavailable"; }
     | { type: "previous_in_flight_request"; }
     | { type: "rate_limited"; retryAfter: number | null; }
     | { type: "cancelled"; }
@@ -340,7 +341,7 @@ export function getAutoCompleteQuestTarget(task: QuestTask): AutoCompleteQuestTa
 function getAutoCompleteQuestTasks(quest: Quest): QuestTask[] {
     const tasks = quest.config.taskConfigV2?.tasks;
 
-    if (!tasks) {
+    if (!tasks || (quest.config.taskConfigV2.joinOperator === QuestTaskJoinOperator.AND && Object.keys(tasks).length > 1)) {
         return [];
     }
 
@@ -376,13 +377,17 @@ function getEffectiveAutoCompleteTaskType(task: QuestTask, quest: Quest): QuestT
 
 function isAutoCompleteQuestTaskEnabled(quest: Quest, task: QuestTask): boolean {
     const taskType = getEffectiveAutoCompleteTaskType(task, quest);
-    const compatible = isDesktopCompatible(taskType);
+    const compatible = isAutoCompleteCompatible(taskType);
     const enabled = getQuestifySettings().autoCompleteQuestTypes[taskType] === true;
 
     return compatible && enabled && getQuestAutoCompleteKind(task) != null;
 }
 
 function resolveAutoCompleteQuest(quest: Quest): { task: QuestTask; kind: AutoCompleteQuestKind; } | null {
+    if (!quest.userStatus?.enrolledAt && !isQuestEnrollmentCompatible(quest)) {
+        return null;
+    }
+
     for (const task of getAutoCompleteQuestTasks(quest)) {
         const kind = getQuestAutoCompleteKind(task);
 
@@ -607,6 +612,14 @@ export function getQuestPanelSubtitleText(quest: Quest): string | null {
     return `${statusText} for an unrecognized reward.`;
 }
 
+export function isQuestEnrollmentCompatible(quest: Quest): boolean {
+    const tasks = Object.values(quest.config.taskConfigV2?.tasks ?? {});
+
+    return tasks.length > 0 && (quest.config.taskConfigV2?.joinOperator === QuestTaskJoinOperator.AND
+        ? tasks.every(task => isEnrollmentCompatible(task.type))
+        : tasks.some(task => isEnrollmentCompatible(task.type)));
+}
+
 export function hasEnabledAutoCompleteQuestTask(quest: Quest): boolean {
     return resolveAutoCompleteQuest(quest) != null;
 }
@@ -721,6 +734,11 @@ export async function ensureQuestEnrolled(quest: Quest, analytics: QuestButtonAn
         return { type: "success" };
     }
 
+    if (!isQuestEnrollmentCompatible(quest)) {
+        QL.info("QUEST_ENROLLMENT_SKIPPED", { questId: quest.id, reason: "unavailable" });
+        return { type: "unavailable" };
+    }
+
     const blockedFor = getEnrollmentRateLimitRemainingSeconds();
 
     if (blockedFor !== null) {
@@ -771,6 +789,12 @@ export async function ensureQuestEnrolled(quest: Quest, analytics: QuestButtonAn
 }
 
 export async function enrollAndStartQuestAutoComplete(quest: Quest, analytics: QuestButtonAnalyticsArgs = {}): Promise<boolean> {
+    quest = refreshQuest(quest);
+
+    if (!canAutoCompleteQuest(quest)) {
+        return false;
+    }
+
     const generation = autoCompleteStartGeneration;
     const enrollment = await ensureQuestEnrolled(quest, analytics);
 
@@ -1369,6 +1393,7 @@ function getQuestProcessingAction(quest: Quest, { autoComplete, source = "manual
         quest.userStatus?.completedAt ||
         getQuestStatus(quest, ignoredQuestIds) !== QuestStatus.Unclaimed ||
         new Date(quest.config.startsAt).getTime() > Date.now() ||
+        (!quest.userStatus?.enrolledAt && !isQuestEnrollmentCompatible(quest)) ||
         !questMatchesIncludedTypes(quest, settings.questButtonIncludedTypes as QuestIncludedTypes)
     ) {
         return { enroll: false, complete: false };
@@ -1494,7 +1519,7 @@ export function processQuests(quests: readonly Quest[], options: ProcessQuestsOp
                         continue;
                     }
 
-                    if (enrollment.type === "previous_in_flight_request") {
+                    if (enrollment.type === "previous_in_flight_request" || enrollment.type === "unavailable") {
                         QL.info("QUEST_PROCESSING_QUEST_SKIPPED", { ...context, questId, reason: enrollment.type });
                         break;
                     }

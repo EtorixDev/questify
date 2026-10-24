@@ -10,7 +10,7 @@ import type { ReactNode } from "react";
 
 import { addIgnoredQuest, questIsIgnored, removeIgnoredQuest } from "../settings/ignoredQuests";
 import { rerenderQuests } from "../settings/rerender";
-import { canAutoCompleteQuest, enrollAndStartQuestAutoComplete, ensureQuestEnrolled, getQuestAutoCompleteEntry, stopQuestAutoComplete } from "../utils/completion";
+import { canAutoCompleteQuest, enrollAndStartQuestAutoComplete, ensureQuestEnrolled, getQuestAutoCompleteEntry, isQuestEnrollmentCompatible, stopQuestAutoComplete } from "../utils/completion";
 import { getQuestStatus, QuestStatus, refreshQuest } from "../utils/questState";
 import type { Quest } from "../utils/types";
 import { q } from "../utils/ui";
@@ -30,7 +30,8 @@ export function QuestTileContextMenu(
     const isEnrolled = Boolean(quest.userStatus?.enrolledAt);
     const isAutoCompleting = getQuestAutoCompleteEntry(quest) != null;
     const canStartAutoComplete = !isClaimedMenu && canAutoCompleteQuest(quest);
-    const canEnroll = !isClaimedMenu && !isEnrolled && !quest.userStatus?.completedAt && getQuestStatus(quest, []) === QuestStatus.Unclaimed;
+    const canEnroll = !isClaimedMenu && !isEnrolled && !quest.userStatus?.completedAt
+        && getQuestStatus(quest, []) === QuestStatus.Unclaimed && isQuestEnrollmentCompatible(quest);
 
     children.unshift((
         <Menu.MenuGroup>
