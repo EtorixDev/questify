@@ -54,23 +54,24 @@ function setOnQuestsPage(force?: boolean): void {
 function startPerAccountTasks(source: string): void {
     const userId = getCurrentUserId();
 
-    if (!userId) {
+    if (!isPluginStarted || getQuestifySettings().disableQuestsEverything || !userId || activeAccountUserId === userId) {
         return;
     }
 
-    if (activeAccountUserId && activeAccountUserId !== userId) {
+    if (activeAccountUserId) {
         accountSessionGeneration++;
         stopPerAccountTasks("ACCOUNT_CHANGE");
     }
 
-    activeAccountUserId = userId;
+    setInitialQuestDataFetched(false);
+    didAttemptAutoCompleteResume = false;
     const startedAt = Date.now();
 
     setOnQuestsPage();
     initializeQuestAutomation();
     startAutoFetchingQuests();
-    resumeAutoCompletesIfReady();
     fetchAndDispatchQuests();
+    activeAccountUserId = userId;
 
     QL.info(`START_TASKS-${source.toUpperCase()}`, { startedAt });
 }
@@ -705,13 +706,16 @@ export default definePlugin({
             promptToRestartIfDirty();
         },
 
-        LOGIN_SUCCESS(): void {
-            if (!isPluginStarted || getQuestifySettings().disableQuestsEverything) {
-                return;
-            }
+        CONNECTION_OPEN(): void {
+            startPerAccountTasks("CONNECTION_OPEN");
+        },
 
-            setInitialQuestDataFetched(false);
-            didAttemptAutoCompleteResume = false;
+        async CURRENT_USER_UPDATE(): Promise<void> {
+            await onceReady;
+            startPerAccountTasks("CURRENT_USER_UPDATE");
+        },
+
+        LOGIN_SUCCESS(): void {
             startPerAccountTasks("LOGIN_SUCCESS");
         },
 
