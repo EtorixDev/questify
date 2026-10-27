@@ -40,7 +40,7 @@ let didAttemptAutoCompleteResume = false;
 const notifiedCompletedQuests = new Set<string>();
 export const enabledOnStartup = PlainSettings.plugins.Questify?.enabled;
 
-function createQuestEnrollmentGuard(): () => boolean {
+export function createQuestEnrollmentGuard(): () => boolean {
     const userId = getCurrentUserId();
     const generation = accountSessionGeneration;
 
