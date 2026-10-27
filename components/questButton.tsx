@@ -58,6 +58,7 @@ function QuestButtonView({ id, className, badgeProps, hasUnread, selected, visib
             id={id}
             className={className}
             icon={QuestButtonIcon}
+            nudgeOnClick
             tooltip="Quests"
             selected={selected}
             unread={hasUnread}

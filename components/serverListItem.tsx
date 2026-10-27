@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./serverListItem.css";
+
 import { ErrorBoundary } from "@components/index";
 import { classes } from "@utils/misc";
 import { findByCodeLazy, findComponentByCodeLazy } from "@webpack";
@@ -44,6 +46,7 @@ export interface ServerListItemProps {
     selected?: boolean;
     unread?: boolean;
     showPill?: boolean;
+    nudgeOnClick?: boolean;
     badge?: ServerListItemBadgeProps;
     onClick?: MouseEventHandler<HTMLElement>;
     onMouseDown?: MouseEventHandler<HTMLElement>;
@@ -52,7 +55,7 @@ export interface ServerListItemProps {
     onMouseLeave?: () => void;
 }
 
-export const ServerListItem = ErrorBoundary.wrap(function ServerListItem({ id, icon, imageUrl, tooltip, "aria-label": ariaLabel, className, style, selected = false, unread = false, showPill = true, badge, onClick, onMouseDown, onContextMenu, onMouseEnter, onMouseLeave }: ServerListItemProps) {
+export const ServerListItem = ErrorBoundary.wrap(function ServerListItem({ id, icon, imageUrl, tooltip, "aria-label": ariaLabel, className, style, selected = false, unread = false, showPill = true, nudgeOnClick = true, badge, onClick, onMouseDown, onContextMenu, onMouseEnter, onMouseLeave }: ServerListItemProps) {
     const [hovered, setHovered] = useState(false);
 
     const imageIcon = useMemo(() => imageUrl ? function ServerListItemImage() {
@@ -77,7 +80,7 @@ export const ServerListItem = ErrorBoundary.wrap(function ServerListItem({ id, i
     }
 
     return (
-        <div id={id} className={classes("vc-server-list-item", className)} style={{ position: "relative", ...style }}>
+        <div id={id} data-nudge-on-click={nudgeOnClick} className={classes("vc-server-list-item", className)} style={{ position: "relative", ...style }}>
             {showPill && (
                 <div style={{ pointerEvents: "none" }}>
                     <ServerListItemPill overlay unread={unread} selected={selected} hovered={hovered} />
