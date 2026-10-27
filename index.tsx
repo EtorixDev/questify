@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { addServerListElement, removeServerListElement, ServerListRenderPosition } from "@api/ServerList";
+import * as ServerListApi from "@api/ServerList";
 import { PlainSettings, Settings } from "@api/Settings";
 import { ErrorBoundary } from "@components/index";
 import definePlugin, { StartAt } from "@utils/types";
@@ -31,7 +31,7 @@ import { notifyQuestCompletion, QL } from "./utils/logging";
 import { getQuestEmbedProgress, getQuestPanelOverride, getQuestPanelPercentComplete, shouldForceQuestPanelVisible } from "./utils/questState";
 import { getLastFilterChoices, getLastSortChoice, getQuestTileClasses, getQuestTileStyle, setLastFilterChoices, setLastSortChoice, shouldPreloadQuestAssets, sortQuests } from "./utils/questTiles";
 import { type Quest, QuestStore, type QuestUserStatus } from "./utils/types";
-import { formatLowerBadge, QUEST_PAGE } from "./utils/ui";
+import { QUEST_PAGE } from "./utils/ui";
 
 let isPluginStarted = false;
 let activeAccountUserId: string | null = null;
@@ -138,7 +138,6 @@ export default definePlugin({
     createQuestEnrollmentGuard,
     disguiseHomeButton,
     enrolledIncompleteButton,
-    formatLowerBadge,
     getActiveAutoCompletes,
     getQuestProcessingBatches,
     getLastFilterChoices,
@@ -203,8 +202,9 @@ export default definePlugin({
             }
         },
         {
-            // Exports the guildless server list item component used by the Quest button.
+            // Exports the guildless server list item if the environment does not already.
             find: '="DOWNLOAD_APPS";function',
+            predicate: () => typeof Reflect.get(ServerListApi, "ServerListItem") !== "function",
             replacement: {
                 match: /(?<=\i\.\i\(\i,\{)(?=\i:\(\)=>\i.{0,30000}?let (\i)=function\(\i\)\{let\{ref:)/,
                 replace: "GuildlessServerListItemComponent:()=>$1,"
@@ -624,29 +624,6 @@ export default definePlugin({
                 },
             ]
         },
-        {
-            // Adds a maxDigits prop to the LowerBadge component which allows for not truncating, or for truncating at a specific threshold.
-            find: ".BADGE_NOTIFICATION_BACKGROUND.css,disableColor",
-            group: true,
-            replacement: [
-                {
-                    // Extracts the custom maxDigits prop.
-                    match: /(\(\i\){let{count:\i,)/,
-                    replace: "$1maxDigits,"
-                },
-                {
-                    // Passes maxDigits to the rounding function.
-                    match: /(children:\i\(\i)/,
-                    replace: "$1,maxDigits"
-                },
-                {
-                    // Makes use of the custom prop if provided by using custom logic for negatives and
-                    // truncation. If the prop is not provided, assume default behavior for native badges.
-                    match: /(?<=function \i\((\i))(\){return )(\i<1e3.{0,60}?k\+`)/,
-                    replace: ",maxDigits$2maxDigits===undefined?($3):$self.formatLowerBadge($1,maxDigits)[0]"
-                }
-            ]
-        },
     ],
 
     flux: {
@@ -746,7 +723,7 @@ export default definePlugin({
         initializeRestartTracking(settings);
 
         if (enabledOnStartup) {
-            addServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+            ServerListApi.addServerListElement(ServerListApi.ServerListRenderPosition.Above, this.renderQuestifyButton);
         }
 
         onceReady.then(() => {
@@ -759,7 +736,7 @@ export default definePlugin({
             if (!getQuestifySettings().disableQuestsEverything) {
                 startPerAccountTasks("PLUGIN_START");
             } else {
-                removeServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+                ServerListApi.removeServerListElement(ServerListApi.ServerListRenderPosition.Above, this.renderQuestifyButton);
             }
         });
     },
@@ -771,7 +748,7 @@ export default definePlugin({
         const userId = activeAccountUserId ?? getCurrentUserId();
 
         disposeRestartTracking();
-        removeServerListElement(ServerListRenderPosition.Above, this.renderQuestifyButton);
+        ServerListApi.removeServerListElement(ServerListApi.ServerListRenderPosition.Above, this.renderQuestifyButton);
         stopPerAccountTasks("PLUGIN_STOP", pluginEnabled);
 
         if (!pluginEnabled && userId) {
