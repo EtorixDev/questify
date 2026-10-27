@@ -163,26 +163,7 @@ div[id^="quest-tile-"] div[class^="confetti__"] {
 }
 
 .questify-quest-button-pill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
     pointer-events: none;
-}
-
-.questify-quest-button-pill > [class*="item"] {
-    will-change: transform;
-    max-height: 8px;
-    min-height: 8px;
-    transition: max-height 0.2s ease-in-out;
-}
-
-.questify-quest-button-pill.hovered > [class*="item"] {
-    max-height: 20px;
-}
-
-.questify-quest-button-pill.selected > [class*="item"] {
-    max-height: 40px;
 }
 
 .questify-quest-button-server-list-button-container {

@@ -110,6 +110,7 @@ function QuestButtonView({
                 <div id={id} className={mainContainerClass}>
                     <div className={pillContainerClass}>
                         <ServerListItemPillComponent
+                            overlay
                             unread={hasUnread}
                             selected={selected}
                             hovered={hovered}
