@@ -52,7 +52,7 @@ export interface ServerListItemProps {
     onMouseLeave?: () => void;
 }
 
-export function ServerListItem({ id, icon, imageUrl, tooltip, "aria-label": ariaLabel, className, style, selected = false, unread = false, showPill = true, badge, onClick, onMouseDown, onContextMenu, onMouseEnter, onMouseLeave }: ServerListItemProps) {
+export const ServerListItem = ErrorBoundary.wrap(function ServerListItem({ id, icon, imageUrl, tooltip, "aria-label": ariaLabel, className, style, selected = false, unread = false, showPill = true, badge, onClick, onMouseDown, onContextMenu, onMouseEnter, onMouseLeave }: ServerListItemProps) {
     const [hovered, setHovered] = useState(false);
 
     const imageIcon = useMemo(() => imageUrl ? function ServerListItemImage() {
@@ -77,36 +77,34 @@ export function ServerListItem({ id, icon, imageUrl, tooltip, "aria-label": aria
     }
 
     return (
-        <ErrorBoundary>
-            <div id={id} className={classes("vc-server-list-item", className)} style={{ position: "relative", ...style }}>
-                {showPill && (
-                    <div style={{ pointerEvents: "none" }}>
-                        <ServerListItemPill overlay unread={unread} selected={selected} hovered={hovered} />
-                    </div>
-                )}
-                <div style={{ position: "relative" }}>
-                    <GuildlessServerListItem
-                        id={id}
-                        icon={imageIcon ?? icon}
-                        tooltip={tooltip}
-                        aria-label={ariaLabel}
-                        showPill={false}
-                        selected={selected}
-                        onClick={onClick}
-                        onMouseDown={onMouseDown}
-                        onContextMenu={onContextMenu}
-                        onMouseEnter={() => {
-                            setHovered(true);
-                            onMouseEnter?.();
-                        }}
-                        onMouseLeave={() => {
-                            setHovered(false);
-                            onMouseLeave?.();
-                        }}
-                        {...(lowerBadge ? { lowerBadge, lowerBadgeSize } : {})}
-                    />
+        <div id={id} className={classes("vc-server-list-item", className)} style={{ position: "relative", ...style }}>
+            {showPill && (
+                <div style={{ pointerEvents: "none" }}>
+                    <ServerListItemPill overlay unread={unread} selected={selected} hovered={hovered} />
                 </div>
+            )}
+            <div style={{ position: "relative" }}>
+                <GuildlessServerListItem
+                    id={id}
+                    icon={imageIcon ?? icon}
+                    tooltip={tooltip}
+                    aria-label={ariaLabel}
+                    showPill={false}
+                    selected={selected}
+                    onClick={onClick}
+                    onMouseDown={onMouseDown}
+                    onContextMenu={onContextMenu}
+                    onMouseEnter={() => {
+                        setHovered(true);
+                        onMouseEnter?.();
+                    }}
+                    onMouseLeave={() => {
+                        setHovered(false);
+                        onMouseLeave?.();
+                    }}
+                    {...(lowerBadge ? { lowerBadge, lowerBadgeSize } : {})}
+                />
             </div>
-        </ErrorBoundary>
+        </div>
     );
-}
+}, { noop: true });
