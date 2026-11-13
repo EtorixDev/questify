@@ -203,7 +203,7 @@ export default definePlugin({
         },
         {
             // Exports the guildless server list item if the environment does not already.
-            find: '="DOWNLOAD_APPS";function',
+            find: '="DOWNLOAD_APPS"',
             predicate: () => typeof Reflect.get(ServerListApi, "ServerListItem") !== "function",
             replacement: {
                 match: /(?<=\i\.\i\(\i,\{)(?=\i:\(\)=>\i.{0,30000}?let (\i)=function\(\i\)\{let\{ref:)/,
