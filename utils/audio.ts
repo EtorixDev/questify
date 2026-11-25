@@ -24,7 +24,7 @@ export function AudioPlayer(name: string, volume: number = 1, callback?: () => v
         });
     }
 
-    return new AudioPlayerConstructor(name, null, clampedVolume, "default", callback);
+    return new AudioPlayerConstructor(name, null, clampedVolume, "default", false, callback, onError);
 }
 
 export function getDefaultSounds(): string[] {

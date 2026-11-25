@@ -446,5 +446,6 @@ export interface QuestStoreType {
     excludedQuests: Map<string, ExcludedQuest>;
     claimedQuests?: Map<string, Quest>;
     getQuest(questId: string): Quest | undefined;
+    getOptimisticProgress?(questId: string, taskType: QuestTaskType | string): number | undefined;
     isQuestExpired?(questId: string): boolean;
 }
