@@ -19,7 +19,6 @@ Modify how Quests behave, hide Quest-related UI, or disable Quest functionality 
     - Does not remove Orbs from the shop due to their deep coupling as a secondary currency.
 - Disable specific Quest UI:
     - Sponsored Banner
-    - Relocation Notices
     - Friends List Promo
     - Members List Promo
     - Account Panel Promo
